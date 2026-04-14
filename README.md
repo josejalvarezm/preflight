@@ -1,4 +1,4 @@
-# AI-OS: Deterministic AI Governance Framework
+# PreFlight: Deterministic AI Governance Framework
 
 A Rust framework that imposes deterministic structure on top of probabilistic LLM-based agents.
 
@@ -269,7 +269,7 @@ and skip gracefully, no failure.
 ## Project Structure
 
 ```
-ai-os/
+preflight/
 ├── .instructions/           # Persistent instruction files
 │   ├── global.md            # System-wide rules
 │   ├── agents/              # Per-agent instruction files

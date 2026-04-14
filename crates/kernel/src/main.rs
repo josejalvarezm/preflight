@@ -33,7 +33,7 @@ fn main() {
 
     let agent_count = kernel.roles().agent_ids().len();
     let boundary_count = kernel.policy_engine().active_count();
-    eprintln!("AI-OS Kernel booted: {agent_count} agent(s) loaded, {boundary_count} boundary(ies) active.");
+    eprintln!("PreFlight Kernel booted: {agent_count} agent(s) loaded, {boundary_count} boundary(ies) active.");
     eprintln!("Decision log: {}", log.display());
     eprintln!("Submit JSON task descriptors on stdin (one per line), or Ctrl+D to exit.");
     eprintln!();
