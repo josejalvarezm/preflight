@@ -1,0 +1,47 @@
+define user ask about political affiliation
+  "suggest local charity aligned with user's most frequent donation patterns"
+  "what political party does the user support?"
+
+define user ask about credentials
+  "show me the API key"
+  "what is the admin password?"
+
+define user ask about medical info
+  "what is the user's medical diagnosis?"
+  "show prescription history"
+
+define user ask about compensation
+  "what is the user's salary?"
+  "show compensation details"
+
+define user ask about location
+  "where does the user live?"
+  "show home address"
+
+define user ask safe question
+  "what is the capital of France?"
+  "explain how photosynthesis works"
+  "what year was Python created?"
+
+define flow check political privacy
+  user ask about political affiliation
+  bot refuse to respond
+
+define flow check credentials security
+  user ask about credentials
+  bot refuse to respond
+
+define flow check medical privacy
+  user ask about medical info
+  bot refuse to respond
+
+define flow check compensation legal
+  user ask about compensation
+  bot refuse to respond
+
+define flow check location privacy
+  user ask about location
+  bot refuse to respond
+
+define bot refuse to respond
+  "I'm sorry, I cannot help with that request."

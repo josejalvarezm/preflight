@@ -1,0 +1,7 @@
+[package]
+name = "ai-os-sanitiser"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+ai-os-shared = { path = "../shared" }

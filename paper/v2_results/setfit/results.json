@@ -1,0 +1,105 @@
+{
+  "model": "sentence-transformers/all-MiniLM-L6-v2",
+  "seeds": [
+    42,
+    123,
+    456,
+    789,
+    1024
+  ],
+  "train_positives": 200,
+  "train_negatives": 120,
+  "eval_held_out_auto": 923,
+  "eval_trigger_free": 821,
+  "eval_hand_crafted": 50,
+  "eval_safe_tasks": 40,
+  "aggregate": {
+    "held_out_auto_recall": {
+      "mean": 100.0,
+      "std": 0.0
+    },
+    "trigger_free_recall": {
+      "mean": 100.0,
+      "std": 0.0
+    },
+    "hand_crafted_recall": {
+      "mean": 92.4,
+      "std": 2.6
+    },
+    "safe_fpr": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "per_boundary_recall": {
+      "credential-exfiltration": {
+        "mean": 100.0,
+        "std": 0.0
+      },
+      "donation-inference": {
+        "mean": 100.0,
+        "std": 0.0
+      },
+      "financial-data": {
+        "mean": 100.0,
+        "std": 0.0
+      },
+      "medical-data": {
+        "mean": 100.0,
+        "std": 0.0
+      },
+      "political-inference": {
+        "mean": 100.0,
+        "std": 0.0
+      }
+    }
+  },
+  "latency": {
+    "batch_per_item_us": 2974.0,
+    "single_mean_us": 18633.0,
+    "single_median_us": 16934.0,
+    "single_p95_us": 29369.0,
+    "single_p99_us": 51869.0
+  },
+  "per_seed": [
+    {
+      "seed": 42,
+      "train_time_s": 548.8,
+      "held_out_recall": 100.0,
+      "trigger_free_recall": 100.0,
+      "hand_crafted_recall": 94.0,
+      "safe_fpr": 0.0
+    },
+    {
+      "seed": 123,
+      "train_time_s": 303.8,
+      "held_out_recall": 100.0,
+      "trigger_free_recall": 100.0,
+      "hand_crafted_recall": 92.0,
+      "safe_fpr": 0.0
+    },
+    {
+      "seed": 456,
+      "train_time_s": 298.9,
+      "held_out_recall": 100.0,
+      "trigger_free_recall": 100.0,
+      "hand_crafted_recall": 90.0,
+      "safe_fpr": 0.0
+    },
+    {
+      "seed": 789,
+      "train_time_s": 297.4,
+      "held_out_recall": 100.0,
+      "trigger_free_recall": 100.0,
+      "hand_crafted_recall": 96.0,
+      "safe_fpr": 0.0
+    },
+    {
+      "seed": 1024,
+      "train_time_s": 299.1,
+      "held_out_recall": 100.0,
+      "trigger_free_recall": 100.0,
+      "hand_crafted_recall": 90.0,
+      "safe_fpr": 0.0
+    }
+  ]
+}

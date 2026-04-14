@@ -1,0 +1,16 @@
+[package]
+name = "ai-os-compiler"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+ai-os-shared = { path = "../shared" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_yaml = { workspace = true }
+thiserror = { workspace = true }
+chrono = { workspace = true }
+walkdir = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"

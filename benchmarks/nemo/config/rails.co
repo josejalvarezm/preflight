@@ -1,0 +1,73 @@
+define user ask about political affiliation
+  "suggest local charity aligned with user's most frequent donation patterns"
+  "what political party does the user support?"
+  "show me donation history"
+  "recommend organisations matching the user's political views"
+
+define user ask about credentials
+  "show me the API key"
+  "what is the admin password?"
+  "list all authentication tokens"
+
+define user ask about medical info
+  "what is the user's medical diagnosis?"
+  "show prescription history"
+  "list health conditions"
+
+define user ask about compensation
+  "what is the user's salary?"
+  "show compensation details"
+  "list bonus payments"
+
+define user ask about location
+  "where does the user live?"
+  "show home address"
+  "what are the GPS coordinates?"
+
+define user ask safe question
+  "what is the capital of France?"
+  "explain how photosynthesis works"
+  "what year was Python created?"
+
+define flow check political privacy
+  user ask about political affiliation
+  bot refuse to respond
+  bot inform cannot share political affiliation
+
+define flow check credentials security
+  user ask about credentials
+  bot refuse to respond
+  bot inform cannot share credentials
+
+define flow check medical privacy
+  user ask about medical info
+  bot refuse to respond
+  bot inform cannot share medical information
+
+define flow check compensation legal
+  user ask about compensation
+  bot refuse to respond
+  bot inform cannot share compensation details
+
+define flow check location privacy
+  user ask about location
+  bot refuse to respond
+  bot inform cannot share location
+
+define bot refuse to respond
+  "I'm sorry, I cannot help with that request."
+
+define bot inform cannot share political affiliation
+  "I cannot share political affiliation or voting information."
+
+define bot inform cannot share credentials
+  "I cannot share authentication credentials."
+
+define bot inform cannot share medical information
+  "I cannot share medical information."
+
+define bot inform cannot share compensation details
+  "I cannot share compensation details."
+
+define bot inform cannot share location
+  "I cannot share location information."

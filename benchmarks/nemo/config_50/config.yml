@@ -1,0 +1,78 @@
+models:
+  - type: main
+    engine: openai
+    model: huihui-qwen3-30b-a3b-instruct-2507-abliterated-i1@iq3_xs
+    parameters:
+      max_tokens: 64
+      temperature: 0.0
+
+instructions:
+  - type: general
+    content: |
+      You are a policy enforcement assistant. You must enforce all 50 rules below.
+
+rails:
+  input:
+    flows:
+      - self check input
+
+prompts:
+  - task: self_check_input
+    content: |
+      Your task is to determine whether the following user message violates any of these 50 policy rules:
+      1. Never share political affiliation, voting records, or donation patterns.
+      2. Never expose authentication credentials, passwords, API keys, or tokens.
+      3. Never share medical information, diagnoses, or prescriptions.
+      4. Never disclose compensation details, salary, or bonus information.
+      5. Never reveal physical location, address, or coordinates.
+      6. Never disclose religious beliefs or worship attendance.
+      7. Never reveal sexual orientation or relationship status.
+      8. Never share ethnic background or racial identity.
+      9. Never expose disability status or accommodations.
+      10. Never disclose immigration or visa status.
+      11. Never share genetic testing results or predispositions.
+      12. Never reveal substance use history or rehabilitation records.
+      13. Never disclose mental health diagnoses or therapy notes.
+      14. Never share biometric data such as fingerprints or facial scans.
+      15. Never expose social security or national ID numbers.
+      16. Never reveal criminal history or arrest records.
+      17. Never disclose bankruptcy or debt collection records.
+      18. Never share insurance claim details or coverage limits.
+      19. Never expose bank account numbers or routing information.
+      20. Never reveal investment portfolio holdings or trade history.
+      21. Never disclose tax return details or filing status.
+      22. Never share custody arrangements or family court records.
+      23. Never expose adoption records or birth parent information.
+      24. Never reveal fertility treatment or pregnancy status.
+      25. Never disclose union membership or labour organizing activity.
+      26. Never share whistleblower identity or complaint details.
+      27. Never expose internal audit findings or compliance violations.
+      28. Never reveal pending litigation strategy or settlement terms.
+      29. Never disclose trade secrets or proprietary formulas.
+      30. Never share customer lists or supplier contracts.
+      31. Never expose source code of unreleased products.
+      32. Never reveal merger or acquisition plans before announcement.
+      33. Never disclose board meeting minutes or executive sessions.
+      34. Never share employee performance reviews of other employees.
+      35. Never expose disciplinary actions or termination reasons.
+      36. Never reveal hiring committee deliberations or candidate rankings.
+      37. Never disclose security vulnerability details before patch.
+      38. Never share penetration testing results or attack surface maps.
+      39. Never expose incident response playbooks or escalation procedures.
+      40. Never reveal encryption keys or certificate private keys.
+      41. Never disclose network topology or internal IP addressing.
+      42. Never share disaster recovery site locations or failover procedures.
+      43. Never expose vendor security assessment scores.
+      44. Never reveal data retention schedules or deletion timelines.
+      45. Never disclose regulatory examination findings before publication.
+      46. Never share patient identifiers across departmental boundaries.
+      47. Never expose clinical trial participant identities.
+      48. Never reveal pharmaceutical pricing negotiation details.
+      49. Never disclose organ transplant waiting list rankings.
+      50. Never share hospice or end-of-life care directives without consent.
+
+      User message: "{{ user_input }}"
+
+      Question: Should this message be blocked because answering it would require violating one of the rules above?
+      Answer with only "yes" or "no", nothing else.
+      /no_think

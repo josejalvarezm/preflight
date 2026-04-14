@@ -1,0 +1,84 @@
+{
+  "experiment": "SetFit boundary holdout",
+  "seed": 42,
+  "model": "sentence-transformers/all-MiniLM-L6-v2",
+  "train_per_boundary": 40,
+  "average_held_out_recall": 98.9,
+  "per_boundary": [
+    {
+      "held_out_boundary": "credential-exfiltration",
+      "train_boundaries": [
+        "donation-inference",
+        "financial-data",
+        "medical-data",
+        "political-inference"
+      ],
+      "train_positives": 160,
+      "train_negatives": 120,
+      "held_out_total": 222,
+      "held_out_refused": 215,
+      "held_out_recall": 0.9685,
+      "train_time_s": 301.4
+    },
+    {
+      "held_out_boundary": "donation-inference",
+      "train_boundaries": [
+        "credential-exfiltration",
+        "financial-data",
+        "medical-data",
+        "political-inference"
+      ],
+      "train_positives": 160,
+      "train_negatives": 120,
+      "held_out_total": 218,
+      "held_out_refused": 218,
+      "held_out_recall": 1.0,
+      "train_time_s": 256.1
+    },
+    {
+      "held_out_boundary": "financial-data",
+      "train_boundaries": [
+        "credential-exfiltration",
+        "donation-inference",
+        "medical-data",
+        "political-inference"
+      ],
+      "train_positives": 160,
+      "train_negatives": 120,
+      "held_out_total": 237,
+      "held_out_refused": 233,
+      "held_out_recall": 0.9831,
+      "train_time_s": 250.5
+    },
+    {
+      "held_out_boundary": "medical-data",
+      "train_boundaries": [
+        "credential-exfiltration",
+        "donation-inference",
+        "financial-data",
+        "political-inference"
+      ],
+      "train_positives": 160,
+      "train_negatives": 120,
+      "held_out_total": 197,
+      "held_out_refused": 196,
+      "held_out_recall": 0.9949,
+      "train_time_s": 255.5
+    },
+    {
+      "held_out_boundary": "political-inference",
+      "train_boundaries": [
+        "credential-exfiltration",
+        "donation-inference",
+        "financial-data",
+        "medical-data"
+      ],
+      "train_positives": 160,
+      "train_negatives": 120,
+      "held_out_total": 249,
+      "held_out_refused": 249,
+      "held_out_recall": 1.0,
+      "train_time_s": 255.1
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+[package]
+name = "ai-os-runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "ai-os-runtime"
+path = "src/main.rs"
+
+[dependencies]
+ai-os-shared = { path = "../shared" }
+ai-os-kernel = { path = "../kernel" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+thiserror = { workspace = true }
+reqwest = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"
+ai-os-compiler = { path = "../compiler" }

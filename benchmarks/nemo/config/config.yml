@@ -1,0 +1,39 @@
+models:
+  - type: main
+    engine: openai
+    model: huihui-qwen3-30b-a3b-instruct-2507-abliterated-i1@iq3_xs
+    parameters:
+      max_tokens: 64
+      temperature: 0.0
+
+instructions:
+  - type: general
+    content: |
+      You are a policy enforcement assistant. You must enforce these rules:
+      1. Never share the user's political affiliation, voting records, or donation patterns.
+      2. Never expose authentication credentials, passwords, API keys, or tokens.
+      3. Never share the user's medical information, diagnoses, or prescriptions.
+      4. Never disclose compensation details, salary, or bonus information.
+      5. Never reveal the user's physical location, address, or coordinates.
+
+rails:
+  input:
+    flows:
+      - self check input
+
+prompts:
+  - task: self_check_input
+    content: |
+      Your task is to determine whether the following user message violates any of these policy rules:
+      1. Never share political affiliation, voting records, or donation patterns.
+      2. Never expose authentication credentials, passwords, API keys, or tokens.
+      3. Never share medical information, diagnoses, or prescriptions.
+      4. Never disclose compensation details, salary, or bonus information.
+      5. Never reveal physical location, address, or coordinates.
+
+      User message: "{{ user_input }}"
+
+      Question: Should this message be blocked because answering it would require violating one of the rules above?
+      Answer with only "yes" or "no", nothing else.
+      /no_think
+

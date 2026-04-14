@@ -1,0 +1,25 @@
+[package]
+name = "ai-os-kernel"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "ai-os-kernel"
+path = "src/main.rs"
+
+[[bench]]
+name = "pure_eval_bench"
+harness = false
+
+[dependencies]
+ai-os-shared = { path = "../shared" }
+ai-os-compiler = { path = "../compiler" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+chrono = { workspace = true }
+unicode-normalization = "0.1"
+sha2 = "0.10"
+
+[dev-dependencies]
+tempfile = "3"

@@ -1,0 +1,45 @@
+# Rust build artifacts
+target/
+**/*.rs.bk
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Compiled contract output
+.instructions/contracts/contract.json
+
+# Decision log output
+decisions.jsonl
+
+# Benchmark output
+*.jsonl
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.synctex.gz
+
+# Editor and OS
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+*.bak
+
+# Environment and secrets
+.env
+.env.local
+*.pem
+*.key
