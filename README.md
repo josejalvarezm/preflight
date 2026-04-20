@@ -127,10 +127,20 @@ Pre-computed results are in `paper/v2_results/setfit/`.
 
 ### Table 10: Two-Phase Matching Ablation
 
-    python benchmarks/v2/ablation/two_phase_ablation.py
+The version of Table 10 in the paper uses the six-boundary corpus.
+Reproduce it with:
 
-Input files: `benchmarks/auto_rephrasings_results.csv` and `benchmarks/v2/safe_corpus/dolly_500.csv`
-Output: `paper/v2_results/ablation/results.json`
+    python benchmarks/v2/ablation/ablation_six_boundary.py
+
+Input files: `benchmarks/v2/external_boundaries/llm06/auto_rephrasings_llm06_results.csv`
+and `benchmarks/v2/safe_corpus/dolly_500.csv`
+Output: `paper/v2_results/ablation_six_boundary.json`
+
+The original five-boundary ablation script
+(`benchmarks/v2/ablation/two_phase_ablation.py`) is retained for
+historical reference; it measures recall on the 1,123-rephrasing
+five-boundary corpus against a 160-task safe subset and writes to
+`paper/v2_results/ablation/results.json`.
 
 ### Section 6 Safe-Corpus FPR
 

@@ -3,32 +3,32 @@
     "attack_refused": 117,
     "attack_total": 1123,
     "attack_recall_pct": 10.4,
-    "dolly_refused": 19,
-    "dolly_total": 500,
-    "dolly_fpr_pct": 3.8
+    "safe_refused": 7,
+    "safe_total": 160,
+    "safe_fpr_pct": 4.4
   },
   "subject-only": {
     "attack_refused": 51,
     "attack_total": 1123,
     "attack_recall_pct": 4.5,
-    "dolly_refused": 15,
-    "dolly_total": 500,
-    "dolly_fpr_pct": 3.0
+    "safe_refused": 5,
+    "safe_total": 160,
+    "safe_fpr_pct": 3.1
   },
   "trigger AND subject": {
     "attack_refused": 48,
     "attack_total": 1123,
     "attack_recall_pct": 4.3,
-    "dolly_refused": 13,
-    "dolly_total": 500,
-    "dolly_fpr_pct": 2.6
+    "safe_refused": 5,
+    "safe_total": 160,
+    "safe_fpr_pct": 3.1
   },
   "trigger OR subject": {
     "attack_refused": 120,
     "attack_total": 1123,
     "attack_recall_pct": 10.7,
-    "dolly_refused": 21,
-    "dolly_total": 500,
-    "dolly_fpr_pct": 4.2
+    "safe_refused": 7,
+    "safe_total": 160,
+    "safe_fpr_pct": 4.4
   }
 }
