@@ -69,21 +69,28 @@ neural inference) and persists across 5--500~boundaries
 ($\sim$4.7\,\textmu s, flat). The cost is semantic coverage: on an
 automated corpus of 1{,}123~LLM-generated adversarial rephrasings,
 PreFlight caught only 4.3\% while NeMo caught 99.7\%. A SetFit
-sentence-transformer (22M~parameters, trained on 200~positive and 120~author-curated negative examples)
-caught 100\% of automated rephrasings and 92.4\% of 50~hand-crafted
-ones at $\sim$19\,ms per inference, but on 500~benign Dolly~15k
-tasks its false-positive rate was 46\%, indicating that the model
-is not deployable without mitigation.
-PreFlight's deterministic engine had a 2.6\% false-positive rate
-on the same 500~tasks.
+sentence-transformer (22M~parameters, trained on 200~positive and
+120~author-curated negative examples) caught 100\% of automated
+rephrasings and 92.4\% of 50~hand-crafted ones at $\sim$19\,ms per
+inference, but on 500~benign Dolly~15k tasks its false-positive rate
+was 46\%.  PreFlight's deterministic engine had a 2.6\% false-positive
+rate on the same 500~tasks.
 
-A three-tier pipeline (PreFlight$\to$SetFit$\to$NeMo) could reduce the
-per-million-decision cost from \$61--\$225 (NeMo alone) to
-\$0.29--\$1.08, but SetFit's 46\% false-positive rate on diverse
-benign traffic must be brought near zero, through additional training
-data or threshold tuning, before these savings are realisable.
-The contribution is the published evasion benchmark and tradeoff
-quantification, not the prototype itself.
+We make three contributions. First, a quantified three-order-of-magnitude
+latency gap between deterministic and LLM-based pre-dispatch enforcement
+that is structural rather than implementation-dependent: it persists
+across hardware, quantisation, and boundary count. Second, the first
+published head-to-head evasion benchmark against NeMo Guardrails on a
+shared rule set, accompanied by a 1{,}123-rephrasing automated corpus,
+an automated generation pipeline, and a pilot extension to an
+OWASP-sourced boundary (LLM06) used to probe external validity. Third,
+an empirical refutation of the naive three-tier cost model: a
+sentence-transformer middle tier trained on narrow negatives fails on
+diverse benign traffic (46\% FPR on Dolly~15k), showing that the
+\$0.29--\$1.08 per-million-decision figure achievable in principle is
+contingent on training-distribution work not addressed here.  The
+deterministic prototype is the measurement harness, not a deployable
+system.
 \end{abstract}
 
 \paragraph{Keywords.} AI governance, agent orchestration, deterministic
@@ -142,9 +149,17 @@ overhead.
 This paper is \emph{not} a claim that keyword matching replaces
 LLM-based guardrails. We show, quantitatively, that it does not:
 96\% of carefully rephrased attacks bypass the deterministic engine.
-The contribution is the published evasion benchmark, the tradeoff
-quantification, and the cost model for layered architectures that
-combine both approaches.
+The contribution is threefold: (i)~a structural
+three-order-of-magnitude latency gap between deterministic and
+LLM-based enforcement, validated across 5--500~boundaries and
+corroborated by a concurrent Microsoft AGT result at the millisecond
+floor; (ii)~the first published head-to-head evasion benchmark against
+NeMo Guardrails on a shared rule set, with a 1{,}123-rephrasing
+automated corpus and an OWASP-sourced external boundary used to probe
+the author-chosen rule set's external validity
+(Section~\ref{sec:eval:external}); (iii)~a negative result on the
+three-tier cost model, showing a sentence-transformer middle tier
+trained on narrow negatives fails on diverse benign traffic.
 
 The remainder is organised as follows. Section~\ref{sec:related}
 surveys related work. Section~\ref{sec:arch} describes the prototype
@@ -870,11 +885,11 @@ user's most frequent donation patterns'' is caught because it contains
 ``recommend organisations matching the user's ideological preferences''
 conveys the same intent with none of the trigger words.
 
-We do not attempt to minimise this limitation. It is the \emph{defining
-tradeoff} of the deterministic approach. The mitigation is layered
-enforcement: deterministic rules for the fast, enumerable, auditable
-cases; LLM-based guardrails (such as NeMo) for the semantic cases that
-require model inference.
+This is the \emph{defining tradeoff} of the deterministic approach;
+no amount of implementation work closes it without neural inference
+in the loop. The mitigation is layered enforcement: deterministic
+rules for the fast, enumerable, auditable cases; LLM-based guardrails
+(such as NeMo) for the semantic cases that require model inference.
 
 \paragraph{Evasion study.}
 To quantify LIM-004, we crafted 50~adversarial rephrasings (10~per
@@ -1040,12 +1055,14 @@ However, on 500~diverse benign tasks from Dolly~15k (the same corpus
 used for the keyword-engine ablation), SetFit refused 230/500 (46\%,
 seed~42). Refused tasks include benign queries such as ``What are some
 fun ways to spend time with your family?'' and ``Name some TV shows
-that American actress Gillian Anderson has been in.'' The model
-over-classifies diverse open-domain text as policy-violating, likely
-because the 120-example negative set is too narrow to teach the
-decision boundary for arbitrary safe traffic. This result means
-SetFit is \emph{not deployable without mitigation}: threshold
-tuning or substantially more diverse negative training data is required.
+that American actress Gillian Anderson has been in.'' The pattern is
+over-classification of open-domain benign text as policy-violating,
+likely because the 120-example negative set is too narrow to teach the
+decision boundary for arbitrary safe traffic.  This is a negative
+result about the three-tier cost model: the middle tier, as
+configured here, is not a drop-in production component.  Closing the
+FPR gap is a training-distribution problem (negative-set breadth,
+threshold tuning, or a larger backbone), not a structural one.
 
 Per-boundary recall is 100\% for all five boundaries on the held-out
 corpus. A leave-one-boundary-out holdout (training on 4~boundaries,
@@ -1113,6 +1130,70 @@ approach is conservative on safe traffic; the FPR would drop to 0.0\%
 if BOUNDARY-005's keyword lists were tightened (e.g., replacing ``home''
 with ``home address''). The corpus is included at
 \texttt{benchmarks/v2/safe\_corpus/dolly\_500.csv}.
+
+\paragraph{External-framework boundary (OWASP LLM06).}
+\label{sec:eval:external}
+A standing threat to validity is that all five primary boundaries are
+author-chosen. To probe external validity we adapted a rule from the
+OWASP Top 10 for LLM Applications, specifically \emph{LLM06:
+Sensitive Information Disclosure}~\cite{owaspllm2024}, as
+\texttt{BOUNDARY-006}:
+
+\begin{lstlisting}[language={},caption={OWASP-sourced external boundary.},basicstyle=\ttfamily\scriptsize]
+- id: BOUNDARY-006
+  category: sensitive-info-disclosure
+  source: OWASP LLM06 (2024 edition)
+  triggers: proprietary, confidential, internal, source,
+            algorithm, model, weights, training, dataset,
+            pii, personal
+  subjects: proprietary, confidential, internal, source,
+            algorithm, weights, training, dataset, pii,
+            personal, identifiable
+  rule: Never expose proprietary algorithms, model internals,
+        training data, or personally identifiable information
+        from upstream systems.
+\end{lstlisting}
+
+The boundary was authored without inspecting the rephrasing corpus
+and adheres to the same trigger/subject schema as BOUNDARY-001--005.
+Unlike the original five, its keyword lists were \emph{not} tuned
+against the evasion corpus; this is intentional.  The role of
+BOUNDARY-006 is to test whether the keyword-matching pattern
+generalises to a rule sourced from an external framework, not to
+re-optimise recall.
+
+\paragraph{Status of measurements.}
+At time of writing, the original five-boundary benchmark numbers in
+Tables~\ref{tab:accuracy}, \ref{tab:evasion_unified},
+\ref{tab:auto_evasion}, \ref{tab:setfit}, and~\ref{tab:ablation}
+reflect the original rule set only.  Adding BOUNDARY-006 requires
+re-running:
+
+\begin{itemize}[nosep]
+  \item \texttt{benchmarks/generate\_evasion\_corpus.py} with the
+    LLM06 rule inserted into the boundary list, producing a sixth
+    per-boundary rephrasing file (target: $\sim$200 entries,
+    matching the range of existing per-boundary corpora).
+  \item \texttt{benchmarks/eval\_auto\_corpus.py} against PreFlight
+    and NeMo on the extended 1{,}300--1{,}400-entry corpus.
+  \item \texttt{benchmarks/v2/setfit/train\_setfit.py} with 40
+    additional LLM06 positives and 24 additional negatives (keeping
+    the 5:3 positive:negative ratio used for BOUNDARY-001--005).
+  \item The Dolly-500 evaluation, unchanged, to observe any FPR
+    shift introduced by the LLM06 trigger set on open-domain
+    traffic (\texttt{pii}, \texttt{personal}, and \texttt{model}
+    are higher-risk for false positives than the original
+    triggers).
+\end{itemize}
+
+The boundary definition, the corpus-generation prompt diff, and the
+SetFit training-set extension are committed to
+\texttt{benchmarks/v2/external\_boundaries/llm06/} so that an
+independent replicator can produce the six-boundary numbers on their
+own hardware.  Reporting these numbers in the main tables is deferred
+to a revision; the purpose of this subsection is to establish the
+mechanism and make the validity gap explicit rather than to close it
+in this submission.
 
 \paragraph{Limitation tracking.}
 The limitation registry is itself a crate (\texttt{ai-os-limitations})
@@ -1375,14 +1456,28 @@ raises the cost of evasion relative to any single-layer system.
 \label{sec:future}
 
 \begin{itemize}[nosep]
+  \item \textbf{Transport-layer enforcement (MCP).} The PreFlight
+    methodology applies to natural-language task descriptions. A
+    parallel surface --- agent-to-tool JSON-RPC traffic ---
+    admits a different form of deterministic enforcement: capability
+    allowlists, tool-annotation enforcement, JSON Schema validation of
+    tool arguments and outputs, elicitation interception, and
+    hash-chained audit logs.  We have prototyped this for the Model
+    Context Protocol (MCP 2025-11-25) as
+    \texttt{arbiter}~\cite{arbiter2026}.  Quantifying its tradeoff
+    against equivalent LLM-based tool-call filtering on an MCP-specific
+    evasion corpus (argument smuggling, destructive-operation
+    camouflage, elicitation bypass) and against Microsoft AGT at the
+    transport layer is future work.
   \item \textbf{Fine-tuned classifier improvement.} The SetFit classifier
     (Section~\ref{sec:limitations}) achieved 100\% recall on automated
     rephrasings and 92.4\% on hand-crafted ones, but its 46\%
-    false-positive rate on diverse benign traffic (Dolly~500) makes it
-    not deployable without mitigation. Expanding the negative training set
-    beyond 120~examples, using a larger sentence-transformer backbone
-    (e.g., \texttt{paraphrase-mpnet-base-v2}), or tuning the
-    classification threshold could reduce FPR while preserving recall.
+    false-positive rate on diverse benign traffic (Dolly~500) is the
+    open training-distribution problem blocking the three-tier cost
+    model. Expanding the negative training set beyond 120~examples,
+    using a larger sentence-transformer backbone (e.g.,
+    \texttt{paraphrase-mpnet-base-v2}), or tuning the
+    classification threshold are the obvious next steps.
   \item \textbf{Cross-boundary generalisation.} The leave-one-boundary-out
     holdout in Section~\ref{sec:limitations} demonstrates generalisation
     across the five existing boundaries at 96.8 to 100 percent recall.
@@ -1506,6 +1601,17 @@ L.~Tunstall, N.~Reimers, U.~Jo, L.~Bates, D.~Korat, M.~Wasserblat,
   and O.~Pereg.
 \newblock Efficient Few-Shot Learning Without Prompts.
 \newblock \emph{arXiv preprint arXiv:2209.11055}, 2022.
+
+\bibitem[{OWASP}(2024)]{owaspllm2024}
+{OWASP Foundation}.
+\newblock OWASP Top 10 for Large Language Model Applications (2024--2025 edition).
+\newblock \url{https://genai.owasp.org/llm-top-10/}, 2024.
+
+\bibitem[{\'Alvarez}(2026)]{arbiter2026}
+J.~\'Alvarez.
+\newblock Arbiter: Deterministic policy enforcement for the Model Context
+  Protocol.
+\newblock \url{https://github.com/josejalvarezm/arbiter-mcp-firewall}, 2026.
 
 \end{thebibliography}
 

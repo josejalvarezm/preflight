@@ -1,0 +1,44 @@
+# BOUNDARY-006: OWASP LLM06 Sensitive Information Disclosure
+# Source: OWASP Top 10 for Large Language Model Applications,
+#         2024-2025 edition, item LLM06.
+# https://genai.owasp.org/llm-top-10/
+#
+# This boundary was authored WITHOUT inspecting the existing evasion
+# rephrasing corpus. It adheres to the same trigger/subject schema
+# used by BOUNDARY-001 through BOUNDARY-005.
+#
+# Deliberately NOT tuned against the evasion corpus: the purpose of
+# this boundary is to probe external validity of the keyword-matching
+# pattern, not to re-optimise recall.
+
+- id: BOUNDARY-006
+  category: sensitive-info-disclosure
+  source: OWASP LLM06 (2024 edition)
+  triggers:
+    - proprietary
+    - confidential
+    - internal
+    - source
+    - algorithm
+    - model
+    - weights
+    - training
+    - dataset
+    - pii
+    - personal
+  subjects:
+    - proprietary
+    - confidential
+    - internal
+    - source
+    - algorithm
+    - weights
+    - training
+    - dataset
+    - pii
+    - personal
+    - identifiable
+  rule: >
+    Never expose proprietary algorithms, model internals, training
+    data, or personally identifiable information from upstream
+    systems.
