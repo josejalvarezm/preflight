@@ -164,9 +164,28 @@ This script runs PreFlight followed by NeMo on the automated evasion corpus, use
 ### Dependencies
 
 - Rust toolchain (for PreFlight benchmarks and the `benchmark_real_llm` integration test)
-- Python 3.10 or newer with the dependencies listed in the benchmark scripts
-- LM Studio running Qwen3-30B-A3B at localhost:1234 for all LLM-based evaluations
-- NeMo Guardrails 0.9 or newer for NeMo-based evaluations
+- Python 3.10 or newer
+- For the SetFit rows (Table 9, `eval_dolly500.py`):
+  `pip install setfit scikit-learn datasets pandas`
+- For the cost/throughput and ablation scripts: `pip install pandas`
+- For LLM-based rows (NeMo, corpus generation, layered prototype):
+  LM Studio running Qwen3-30B-A3B at `localhost:1234`
+- For NeMo-specific rows: NeMo Guardrails 0.9 or newer
+
+Scripts that work on a fresh clone with only Rust + Python + pandas
+(no GPU, no LM Studio):
+
+- `cargo test --release` (73 deterministic tests)
+- `benchmarks/v2/cost_model.py`
+- `benchmarks/v2/safe_corpus/safe_fpr.py`
+- `benchmarks/v2/ablation/ablation_six_boundary.py`
+- `benchmarks/v2/ablation/two_phase_ablation.py`
+- `cargo test --release -p ai-os-kernel benchmark_enforcement_latency`
+- `cargo test --release -p ai-os-kernel --test benchmark_scaling`
+
+These reproduce Tables 2-5, 10, 13, 14 and the Section 6 safe-corpus
+FPR directly from shipped artefacts in `paper/v2_results/` and the
+CSVs under `benchmarks/`.
 
 ## Core Invariant
 
