@@ -4,7 +4,7 @@ other 4 boundaries' positives + same negative pool, evaluate on the
 held-out boundary's positives from the automated corpus. Seed 42 only.
 
 Reports per-boundary held-out recall.
-Saves to blog/paper/v2_results/setfit/boundary_holdout.json.
+Saves to paper/v2_results/setfit/boundary_holdout.json.
 """
 import csv
 import json
@@ -18,7 +18,7 @@ SEED = 42
 TRAIN_PER_BOUNDARY = 40
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 AUTO_CSV = os.path.join("benchmarks", "auto_rephrasings_results.csv")
-RESULTS_JSON = os.path.join("blog", "paper", "v2_results", "setfit", "boundary_holdout.json")
+RESULTS_JSON = os.path.join("paper", "v2_results", "setfit", "boundary_holdout.json")
 
 # Same safe-task negatives used during training (first 120)
 SAFE_TASKS = [

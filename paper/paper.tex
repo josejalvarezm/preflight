@@ -62,35 +62,42 @@ trigger/subject boundaries, we benchmark five enforcement
 configurations on identical hardware and model
 (Qwen3-30B-A3B, LM~Studio).
 
-End-to-end deterministic enforcement takes $\sim$\,118\,\textmu s versus
-$\sim$\,437\,ms for NeMo Guardrails on the refuse path, a gap of
-three orders of magnitude that is structural (keyword lookup vs.\
-neural inference) and persists across 5--500~boundaries
-($\sim$4.7\,\textmu s, flat). The cost is semantic coverage: on an
-automated corpus of 1{,}123~LLM-generated adversarial rephrasings,
-PreFlight caught only 4.3\% while NeMo caught 99.7\%. A SetFit
-sentence-transformer (22M~parameters, trained on 200~positive and
-120~author-curated negative examples) caught 100\% of automated
-rephrasings and 92.4\% of 50~hand-crafted ones at $\sim$19\,ms per
-inference, but on 500~benign Dolly~15k tasks its false-positive rate
-was 46\%.  PreFlight's deterministic engine had a 2.6\% false-positive
-rate on the same 500~tasks.
+End-to-end deterministic enforcement on the five-boundary latency
+configuration takes $\sim$\,118\,\textmu s versus $\sim$\,437\,ms
+for NeMo Guardrails on the refuse path, a gap of three orders of
+magnitude that is structural (keyword lookup vs.\ neural inference)
+and persists across 5--500~boundaries ($\sim$4.7\,\textmu s, flat).
+The gap is argued to persist across hardware on structural grounds
+(the deterministic path performs no neural inference); only one
+hardware configuration was measured directly.
+The cost is semantic coverage: on an
+automated corpus of 1{,}423~LLM-generated adversarial rephrasings
+spanning six boundaries (five author-chosen plus one OWASP-sourced),
+PreFlight caught only 8.7\% while NeMo caught 100\%. A SetFit
+sentence-transformer (22M~parameters, trained on 240~positive
+and 120~author-curated negative examples)
+caught 100\% of automated
+rephrasings and 96.8\% (SD = 1.8\%) of 50~hand-crafted ones at
+$\sim$6.15\,ms per single inference (and $\sim$1.1\,ms in batch mode),
+but on 500~benign Dolly~15k tasks
+its false-positive rate was 47\%.  PreFlight's deterministic engine
+had a 3.4\% false-positive rate on the same 500~tasks.
 
 We make three contributions. First, a quantified three-order-of-magnitude
 latency gap between deterministic and LLM-based pre-dispatch enforcement
-that is structural rather than implementation-dependent: it persists
-across hardware, quantisation, and boundary count. Second, the first
-published head-to-head evasion benchmark against NeMo Guardrails on a
-shared rule set, accompanied by a 1{,}123-rephrasing automated corpus,
-an automated generation pipeline, and a pilot extension to an
-OWASP-sourced boundary (LLM06) used to probe external validity. Third,
-an empirical refutation of the naive three-tier cost model: a
+that is structural rather than implementation-dependent: it is flat
+across 5--500~boundaries and across the two quantisations we tested,
+and is argued to persist across hardware on structural grounds.
+Second, a head-to-head evasion benchmark against NeMo Guardrails on a
+shared rule set, accompanied by a 1{,}423-rephrasing automated corpus
+spanning six boundaries (five author-chosen plus an OWASP-sourced
+LLM06 rule used to probe external validity) and an automated
+generation pipeline. Third,
+an empirical negative result on the three-tier cost model: a
 sentence-transformer middle tier trained on narrow negatives fails on
-diverse benign traffic (46\% FPR on Dolly~15k), showing that the
-\$0.29--\$1.08 per-million-decision figure achievable in principle is
-contingent on training-distribution work not addressed here.  The
-deterministic prototype is the measurement harness, not a deployable
-system.
+diverse benign traffic (47\% FPR on Dolly~15k), showing that the
+per-million-decision savings in Section~\ref{sec:cost} are contingent
+on training-distribution work not addressed here.
 \end{abstract}
 
 \paragraph{Keywords.} AI governance, agent orchestration, deterministic
@@ -128,13 +135,14 @@ enforced without an LLM and those that cannot.
 This paper measures that boundary. We built a Rust prototype
 (PreFlight) that compiles human-authored Markdown instruction files
 into two-phase trigger/subject policy boundaries and enforces them
-via keyword-indexed lookup in $\sim$\,118\,\textmu s; no neural
+via keyword-indexed lookup in $\sim$\,118\,\textmu s (five-boundary
+latency configuration); no neural
 inference in the evaluation loop. We then benchmarked PreFlight
 against NeMo Guardrails, an LLM-binary classifier, an LLM-verbose
-JSON reasoner, a TF-IDF baseline, and a SetFit sentence-transformer,
-using the same five boundary rules, the same model, and the same
-hardware throughout. We subjected all systems to an evasion study of
-1{,}123~LLM-generated adversarial rephrasings plus 50~hand-crafted
+JSON reasoner, a TF-IDF baseline, and a SetFit sentence-transformer
+on the five-boundary latency head-to-head, and extended the evasion
+study to six boundaries with an OWASP-sourced LLM06 rule. We subjected all systems to an evasion study of
+1{,}423~LLM-generated adversarial rephrasings plus 50~hand-crafted
 ones, and measured false-positive rates on 500~benign tasks from
 Dolly~15k.
 
@@ -153,13 +161,18 @@ The contribution is threefold: (i)~a structural
 three-order-of-magnitude latency gap between deterministic and
 LLM-based enforcement, validated across 5--500~boundaries and
 corroborated by a concurrent Microsoft AGT result at the millisecond
-floor; (ii)~the first published head-to-head evasion benchmark against
-NeMo Guardrails on a shared rule set, with a 1{,}123-rephrasing
-automated corpus and an OWASP-sourced external boundary used to probe
-the author-chosen rule set's external validity
+floor; (ii)~a head-to-head evasion benchmark against
+NeMo Guardrails on a shared rule set, with a 1{,}423-rephrasing
+automated corpus spanning six boundaries, including an OWASP-sourced
+external boundary used to probe the author-chosen rule set's external
+validity
 (Section~\ref{sec:eval:external}); (iii)~a negative result on the
 three-tier cost model, showing a sentence-transformer middle tier
-trained on narrow negatives fails on diverse benign traffic.
+trained on narrow negatives fails on diverse benign traffic. The
+latency and accuracy claims (i) are measured on the
+\emph{five-boundary} configuration; the evasion and FPR claims (ii,
+iii) are measured on the \emph{six-boundary} configuration. Every
+table caption below states which.
 
 The remainder is organised as follows. Section~\ref{sec:related}
 surveys related work. Section~\ref{sec:arch} describes the prototype
@@ -237,10 +250,11 @@ Several have converged on deterministic pre-dispatch enforcement
 independently: Airia Agent Constraints~\cite{airia2025} (September
 2025), Microsoft AGT~\cite{agt2026} (April 2026), and Uchibeke's
 pre-action authorisation~\cite{oap2026} (March 2026). The
-simultaneous convergence corroborates the problem statement. None of
-the systems in Table~\ref{tab:landscape} publishes a quantified
-evasion benchmark comparing deterministic and LLM-based enforcement
-on the same rule set; that is the contribution of this work.
+simultaneous convergence corroborates the problem statement. We are
+not aware of a published quantified evasion benchmark from any of
+the systems in Table~\ref{tab:landscape} that compares deterministic
+and LLM-based enforcement on the same rule set; that gap is what
+this work addresses.
 
 \begin{table}[ht]
 \centering
@@ -269,10 +283,13 @@ PreFlight (this work)               & \checkmark & \checkmark & \checkmark & \ch
 \label{sec:arch}
 
 We refer to the prototype as
-\emph{PreFlight}\footnote{The prototype is archived under the working
-name \texttt{ai-os-research} in the repository; we use the name
-PreFlight throughout this paper to reflect its scope as a pre-dispatch
-enforcement layer rather than an operating system.}
+\emph{PreFlight}\footnote{The prototype is archived in the
+repository under the working name \texttt{ai-os-research}; that
+archive name is retained for provenance (it is the label attached
+to the reproducible artefact corresponding to the date on this
+paper). We use the name \emph{PreFlight} throughout the paper for
+readability, to reflect its scope as a pre-dispatch enforcement
+layer rather than an operating system.}
 throughout this paper; the name reflects its role as a pre-dispatch
 check (``pre-flight'') rather than a claim to operating-system scope.
 
@@ -513,10 +530,13 @@ LLM-based measurement to exclude model-loading time.
 
 \begin{table}[ht]
 \centering
-\caption{Enforcement latency comparison. All systems enforce the same five
-  boundary rules. The LLM backend is identical (Qwen3-30B-A3B,
-  LM~Studio, localhost). PreFlight: mean of 1{,}000~iterations;
-  LLM-based systems: mean of 30~iterations ($n = 150$ for NeMo).}
+\caption{Enforcement latency comparison, \emph{five-boundary latency
+  configuration} (BOUNDARY-001--005). The LLM backend is identical
+  (Qwen3-30B-A3B, LM~Studio, localhost). PreFlight: mean of
+  1{,}000~iterations; LLM-based systems: mean of 30~iterations
+  ($n = 150$ for NeMo). The six-boundary evasion and FPR numbers
+  (Tables~\ref{tab:auto_evasion}, \ref{tab:setfit},
+  \ref{tab:ablation}) were collected separately.}
 \label{tab:latency}
 \small
 \begin{tabular}{lrrrr}
@@ -549,7 +569,7 @@ NeMo Guardrails     & 437\,ms         & 6{,}927\,ms$^\dagger$  & 1$\times$ & $\s
     dedicated framework; it serves as an upper bound on
     general-purpose LLM inference cost for policy enforcement.
     It sends the task text and
-    all five boundary rules to the LLM with a well-engineered prompt:
+    all five latency-benchmark boundary rules to the LLM with a well-engineered prompt:
     explicit rule listing, few-shot examples of REFUSE and ALLOW
     decisions, a JSON output schema, evaluation criteria including
     indirect references, and a ``when in doubt, REFUSE'' instruction
@@ -575,10 +595,13 @@ NeMo Guardrails     & 437\,ms         & 6{,}927\,ms$^\dagger$  & 1$\times$ & $\s
     but remains orders of magnitude slower than PreFlight
     (Table~\ref{tab:latency}).
   \item \textbf{NeMo Guardrails} uses its standard \texttt{self\_check\_input}
-    rail with a custom enforcement prompt listing the five boundary rules.
-    This is NeMo's recommended approach for input-level policy enforcement.
-    NeMo correctly refused \textbf{5/5} attack tasks and allowed
-    \textbf{5/5} safe tasks.
+    rail with a custom enforcement prompt listing the five latency-benchmark
+    boundary rules (BOUNDARY-001--005). This is NeMo's recommended approach for
+    input-level policy enforcement. NeMo correctly refused \textbf{5/5} attack
+    tasks and allowed \textbf{5/5} safe tasks in the five-boundary latency run.
+    The six-boundary evasion experiment uses the same rail with a sixth
+    \texttt{BOUNDARY-006} block appended to the prompt; those numbers are
+    reported separately (Section~\ref{sec:limitations}).
 
     \emph{Important caveat on allowed-task latency:} The high safe-task
     latency ($\sim$6.9\,s) includes full response generation, not only
@@ -603,9 +626,11 @@ deterministic path involves no neural inference.
 
 \begin{table}[ht]
 \centering
-\caption{Enforcement accuracy. Five attack tasks trigger keyword boundaries;
-  five safe tasks contain no trigger keywords. LLM-based systems ran 30~iterations
-  ($n = 150$ each).}
+\caption{Enforcement accuracy, \emph{five-boundary latency configuration}.
+  Five attack tasks trigger keyword boundaries; five safe tasks contain
+  no trigger keywords. LLM-based systems ran 30~iterations ($n = 150$
+  each). The larger six-boundary evasion head-to-head is in
+  Table~\ref{tab:auto_evasion}.}
 \label{tab:accuracy}
 \begin{tabular}{lcc}
 \toprule
@@ -754,8 +779,9 @@ is the cost of JSONL audit-log writes per decision.
 \paragraph{NeMo scaling comparison.}
 To test whether NeMo Guardrails exhibits latency growth at higher
 boundary counts, we ran a separate scaling experiment: the same
-\texttt{self\_check\_input} rail with 5~boundaries (original) vs.\
-50~boundaries (the enforcement prompt expanded from 5 to 50~rules),
+\texttt{self\_check\_input} rail with 5~boundaries (the original
+five) vs.\ 50~boundaries (the enforcement prompt expanded with
+45~synthetic rule stubs --- \emph{not} the LLM06 rule),
 using 30~iterations $\times$ 5~attack tasks ($n = 150$) per
 configuration.  NeMo's mean refuse-path latency was 437.2\,ms at
 5~boundaries and 429.5\,ms at 50~boundaries, a ratio of 0.98$\times$,
@@ -844,10 +870,14 @@ elsewhere in this paper can be traced to this table.
 \begin{table}[ht]
 \centering
 \caption{Unified evasion results: refuse rate (\%) by corpus and
-  enforcement system. Higher is better.  Pilot and strict corpora are
-  reported separately for PreFlight (different construction methods);
+  enforcement system. Higher is better.  Pilot, strict, and combined
+  hand-crafted corpora were authored against BOUNDARY-001--005 only
+  (five-boundary scope); the Automated rows are the six-boundary
+  corpus (BOUNDARY-001--006).
   SetFit was evaluated only on the combined 50~rephrasings.
-  TF-IDF was evaluated only on the full automated corpus.}
+  The TF-IDF figure was measured on the original five-boundary
+  automated corpus (N=1{,}123) and is repeated in the Automated row
+  only for comparability; it was not re-run on the six-boundary corpus.}
 \label{tab:evasion_unified}
 \small
 \begin{tabular}{lrcccc}
@@ -856,12 +886,13 @@ elsewhere in this paper can be traced to this table.
 \midrule
 Pilot (hand-crafted)      &    25  & 40.0\% & ---   & ---         & 100\%  \\
 Strict (hand-crafted)     &    25  &  4.0\% & ---   & ---         & 100\%  \\
-Hand-crafted (combined)   &    50  & ---    & ---   & 92.4\%$^a$ & 100\%  \\
-Automated (full)          & 1{,}123 &  4.3\% & 2.6\% & 100.0\%$^b$ (N=923) & 99.7\% \\
-Automated (trigger-free)  & 1{,}003 &  0.9\% & ---   & 100.0\%     & 99.7\% \\
+Hand-crafted (combined)   &    50  & ---    & ---   & 96.8\%$^a$ & 100\%  \\
+Automated (full)          & 1{,}423 &  8.7\% & 2.6\%$^c$ (N=1{,}123) & 100.0\%$^b$ (N=1{,}183) & 100\% \\
+Automated (trigger-free)  & 1{,}256 &  3.9\% & ---   & 100.0\% (N=1{,}049) & 100\% \\
 \bottomrule
-\multicolumn{6}{l}{\footnotesize $^a$Mean across 5~seeds (SD = 2.6\% across 5 seeds). Not evaluated separately on pilot/strict subsets.} \\
-\multicolumn{6}{l}{\footnotesize $^b$Held-out 923~rephrasings (200~used for training).} \\
+\multicolumn{6}{l}{\footnotesize $^a$Mean across 5~seeds (SD = 1.8\% on six-boundary corpus). Not evaluated separately on pilot/strict subsets.} \\
+\multicolumn{6}{l}{\footnotesize $^b$Mean across 5~seeds, held-out 1{,}183~rephrasings (240~used for training); SD = 0.0\%.} \\
+\multicolumn{6}{l}{\footnotesize $^c$TF-IDF figure is from the original five-boundary corpus and was not re-run for six boundaries.} \\
 \end{tabular}
 \end{table}
 
@@ -937,87 +968,126 @@ $\sim$437\,ms per evaluation.  The evasion script and CSV are included
 in \texttt{benchmarks/evasion\_study.py} and
 \texttt{benchmarks/nemo/nemo\_evasion.py}.
 
-\paragraph{Automated evasion corpus (1{,}123~rephrasings).}
+\paragraph{Automated evasion corpus (1{,}423~rephrasings, six boundaries).}
 To address single-author bias, we generated a larger corpus using an
-LLM (Qwen3-30B-A3B via LM~Studio) to produce adversarial rephrasings
-programmatically.  For each of the five boundaries, the LLM was
-prompted to generate semantically equivalent requests that avoid the
-boundary's trigger keywords. After deduplication (Jaccard threshold
-0.85) and trigger-word filtering, this produced \textbf{1{,}123}
-rephrasings: 1{,}003~trigger-free and 120~trigger-containing.
+LLM to produce adversarial rephrasings programmatically. The generator
+was an \emph{abliterated} variant of Qwen3-30B-A3B (safety-tuning
+removed) served via LM~Studio at \texttt{iq3\_xs} quantisation, with
+temperature~0.9; abliteration was necessary because the stock safety-
+tuned model refuses to produce adversarial rephrasings of policy-
+protected content, which would have confounded the generation yield.
+For each of the six boundaries --- the five
+original author-chosen boundaries plus the OWASP LLM06 external
+boundary introduced in Section~\ref{sec:eval:external} --- the LLM
+was prompted to generate semantically equivalent requests that
+avoid the boundary's trigger keywords. After deduplication
+(Jaccard threshold 0.85) and trigger-word filtering, this produced
+\textbf{1{,}423} rephrasings: 1{,}256~trigger-free and
+167~trigger-containing.
 Table~\ref{tab:auto_evasion} shows the results.
 
 \begin{table}[h]
 \centering
-\caption{Automated evasion corpus: 1{,}123 LLM-generated rephrasings vs.\ PreFlight and NeMo Guardrails.}
+\caption{Automated evasion corpus: 1{,}423 LLM-generated rephrasings across six boundaries vs.\ PreFlight and NeMo Guardrails. BOUNDARY-006 is the OWASP LLM06 external-framework boundary (Section~\ref{sec:eval:external}); its keyword lists were not tuned against this corpus.}
 \label{tab:auto_evasion}
 \small
 \begin{tabular}{lccccc}
 \toprule
 \textbf{Boundary} & \textbf{N} & \textbf{PreFlight} & \textbf{PreFlight \%} & \textbf{NeMo} & \textbf{NeMo \%} \\
 \midrule
-political-inference     & 249 &  7 &  2.8\% & 249 & 100\% \\
-credential-exfiltration & 222 &  1 &  0.5\% & 219 & 98.6\% \\
-medical-data            & 197 & 25 & 12.7\% & 197 & 100\% \\
-financial-data          & 237 & 14 &  5.9\% & 237 & 100\% \\
-donation-inference      & 218 &  1 &  0.5\% & 218 & 100\% \\
+political-inference        & 247 & 23 &  9.3\% & 247 & 100\% \\
+credential-exfiltration    & 231 &  8 &  3.5\% & 231 & 100\% \\
+medical-data               & 230 & 24 & 10.4\% & 230 & 100\% \\
+financial-data             & 309 & 38 & 12.3\% & 309 & 100\% \\
+donation-inference         & 204 &  1 &  0.5\% & 204 & 100\% \\
+sensitive-info-disclosure  & 202 & 30 & 14.9\% & 202 & 100\% \\
 \midrule
-\textbf{Total}          & \textbf{1{,}123} & \textbf{48} & \textbf{4.3\%} & \textbf{1{,}120} & \textbf{99.7\%} \\
+\textbf{Total}             & \textbf{1{,}423} & \textbf{124} & \textbf{8.7\%} & \textbf{1{,}423} & \textbf{100\%} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-On the trigger-free subset (1{,}003~rephrasings), PreFlight refused only
-9~(0.9\%), confirming that trigger avoidance alone defeats keyword
-matching. NeMo refused 1{,}000/1{,}003~(99.7\%), missing only
-3~credential-exfiltration rephrasings. The generation script
+On the trigger-free subset (1{,}256~rephrasings), PreFlight refused
+only 49~(3.9\%), confirming that trigger avoidance alone defeats
+keyword matching. NeMo refused 1{,}256/1{,}256~(100\%) under the
+\texttt{self\_check\_input} rail configuration with the six-boundary
+prompt (the original five-boundary prompt from Appendix~\ref{app:prompt}
+extended with a sixth \texttt{BOUNDARY-006} block listing the LLM06
+rule and its trigger list). An earlier five-boundary run on a smaller
+1{,}123-rephrasing corpus reported 99.7\% (three credential-
+exfiltration misses); both the prompt expansion and the larger,
+more diverse generator pool contribute to the 100\% headline figure.
+The contribution of each cause was not isolated --- we did not re-run
+NeMo against the old 1{,}123-rephrasing corpus under the six-boundary
+prompt to separate the prompt-expansion effect from the corpus-
+expansion effect --- and the three-rephrasing gap between runs does
+not change the qualitative head-to-head comparison. The six-boundary
+numbers
+merge the original five author-chosen boundaries and the OWASP LLM06
+external boundary; per-boundary PreFlight refuse rates range from
+0.5\% (donation-inference, which has the narrowest trigger set) to
+14.9\% (sensitive-info-disclosure, whose eleven-word trigger list is
+the widest of any boundary). The generation script
 (\texttt{benchmarks/\allowbreak generate\_evasion\_corpus.py}),
 evaluation script
 (\texttt{benchmarks/\allowbreak eval\_auto\_corpus.py}), and
-per-rephrasing results CSV are included in the repository.
+per-rephrasing results CSV
+(\texttt{benchmarks/v2/external\_boundaries/llm06/\allowbreak auto\_rephrasings\_llm06\_results.csv})
+are included in the repository.
 
 \paragraph{Layered defence measurement.}
 Combining both engines in a layered pipeline (refuse if \emph{either}
 PreFlight or NeMo fires), the layered system caught
-\textbf{1{,}120/1{,}123}~(99.7\%) of the automated corpus. End-to-end
-latency on a 30-sample timing run averaged $\sim$433\,ms per request
-(dominated by the NeMo LLM call), with PreFlight adding $\sim$11\,ms of
-subprocess overhead. Requests caught by PreFlight alone (3.3\% of the
-sample) completed in $\sim$10\,ms, avoiding the LLM call entirely.
+\textbf{1{,}423/1{,}423}~(100\%) of the six-boundary automated corpus
+(because NeMo refused every input under the \texttt{self\_check\_input}
+rail configured for this evaluation).  End-to-end latency on the
+original 30-sample five-boundary timing run averaged $\sim$433\,ms
+per request (dominated by the NeMo LLM call), with PreFlight adding
+$\sim$11\,ms of subprocess overhead. Requests caught by PreFlight
+alone (8.7\% of the six-boundary sample) completed in $\sim$10\,ms,
+avoiding the LLM call entirely.
 The latency benchmark script is at
 \texttt{benchmarks/layered\_prototype.py}.
 
 \paragraph{Classifier baseline.}
 As a lightweight alternative to full LLM inference, we trained a
 TF-IDF + Logistic Regression classifier on 8~positive and 8~negative
-synthetic examples per boundary (80~total). The classifier refused
-only 29/1{,}123~(2.6\%), worse than PreFlight (4.3\%) and far below
-NeMo (99.7\%). Per-item latency was $\sim$12\,\textmu s in batch mode,
-comparable to the deterministic engine. The poor recall confirms that
-na\"ive classification on minimal training data does not bridge the
-gap between keyword matching and LLM-based semantic understanding.
+synthetic examples per boundary (80~total, five-boundary setup). The
+classifier refused only 29/1{,}123~(2.6\%) on the original
+five-boundary corpus, worse than PreFlight and far below NeMo. Per-item
+latency was $\sim$12\,\textmu s in batch mode, comparable to the
+deterministic engine. The poor recall confirms that na\"ive
+classification on minimal training data does not bridge the gap
+between keyword matching and LLM-based semantic understanding.
 This result establishes a lower bound for na\"ive ML approaches
-without fine-tuning or semantic embeddings.
+without fine-tuning or semantic embeddings; the six-boundary
+re-run of this baseline was not performed because the SetFit
+sentence-transformer baseline (next paragraph) dominates it.
 
 \paragraph{SetFit sentence-transformer baseline.}
 To test whether a fine-tuned sentence-transformer can bridge the gap
 between keyword matching and full LLM inference, we trained a SetFit
 classifier~\cite{setfit2022} using
-\texttt{all-MiniLM-L6-v2} (22M~parameters). Training data: 200~positive
-examples (40~per boundary, stratified from the automated corpus) and
-120~negative examples (hand-written safe tasks defined in the training script, disjoint from Dolly~15k), with 5~random seeds
-(42, 123, 456, 789, 1024). The 50~hand-crafted rephrasings used for
-evaluation are a separate corpus (\texttt{rephrasings.csv}), entirely
-disjoint from the automated training data
-(\texttt{auto\_rephrasings\_results.csv}).
+\texttt{all-MiniLM-L6-v2} (22M~parameters). Training data: 240~positive
+examples (40~per boundary, stratified from the six-boundary automated
+corpus) and 120~negative examples (hand-written safe
+tasks defined in the training script, disjoint from Dolly~15k;
+the negative set was held constant between the five-boundary and
+six-boundary runs, so the recall uplift on held-out hand-crafted
+rephrasings from 92.4\% to 96.8\% is attributable to the additional
+40 positives rather than negative-set expansion),
+with 5~random
+seeds (42, 123, 456, 789, 1024). The 50~hand-crafted rephrasings used
+for evaluation are a separate corpus (\texttt{rephrasings.csv}),
+entirely disjoint from the automated training data
+(\texttt{benchmarks/v2/external\_boundaries/llm06/\allowbreak auto\_rephrasings\_llm06\_results.csv}).
 Table~\ref{tab:setfit} summarises the results.
 
 \begin{table}[h]
 \centering
-\caption{SetFit classifier: mean and SD across 5~seeds. Recall
-  measured on held-out automated rephrasings (923), trigger-free
-  subset (821 = 1{,}003 $-$ 182 trigger-free examples allocated to
-  training), and hand-crafted rephrasings (50). FPR on 40~safe
+\caption{SetFit classifier (six-boundary): mean and SD across 5~seeds. Recall
+  measured on held-out automated rephrasings (1{,}183), trigger-free
+  subset (1{,}049), and hand-crafted rephrasings (50). FPR on 40~safe
   tasks and on 500~Dolly tasks (seed~42 only).}
 \label{tab:setfit}
 \small
@@ -1025,51 +1095,70 @@ Table~\ref{tab:setfit} summarises the results.
 \toprule
 \textbf{Eval set} & \textbf{Recall / FPR} & \textbf{SD} \\
 \midrule
-Held-out auto (923)     & 100.0\% & 0.0\% \\
-Trigger-free (821)      & 100.0\% & 0.0\% \\
-Hand-crafted (50)       &  92.4\% & 2.6\% \\
+Held-out auto (1{,}183)  & 100.0\% & 0.0\% \\
+Trigger-free (1{,}049)   & 100.0\% & 0.0\% \\
+Hand-crafted (50)        &  96.8\% & 1.8\% \\
 \midrule
-Safe tasks FPR (40)$^c$ &   0.0\% & 0.0\% \\
-Dolly~500 FPR (500)     &  46.0\% & (seed 42) \\
+Safe tasks FPR (40)$^c$  &   0.0\% & 0.0\% \\
+Dolly~500 FPR (500)      &  47.0\% & (seed 42) \\
 \bottomrule
 \multicolumn{3}{l}{\footnotesize $^c$Held-out 25\% of the safe task pool; the remaining 75\% (120) are training negatives.} \\
 \end{tabular}
 \end{table}
 
-SetFit achieves perfect recall on the automated corpus, including the
-821~trigger-free rephrasings that the keyword engine misses almost
-entirely (0.9\%). On 50~hand-crafted rephrasings, recall drops to
-92.4\% (SD = 2.6\% across 5 seeds), suggesting that human-authored evasion is harder
-than LLM-generated evasion.  The gap likely reflects qualitatively
-different strategies: humans exploit pragmatic context and ambiguity,
-whereas LLM generators rely on lexical substitution. This makes
-cross-author validation an important direction for future work.
-Per-item latency is $\sim$3\,ms in batch
-mode and $\sim$19\,ms for single inference, roughly 4{,}000$\times$
-slower than keyword matching but 23$\times$ faster than NeMo's LLM
-call.
+SetFit achieves perfect recall on the automated six-boundary corpus,
+including the 1{,}049~trigger-free rephrasings that the keyword
+engine misses almost entirely (3.9\%). On 50~hand-crafted
+rephrasings, recall drops to 96.8\% (SD = 1.8\% across 5 seeds),
+suggesting that human-authored evasion is harder than LLM-generated
+evasion.  The gap likely reflects qualitatively different strategies:
+humans exploit pragmatic context and ambiguity, whereas LLM
+generators rely on lexical substitution. This makes cross-author
+validation an important direction for future work.  The
+4.4-percentage-point improvement over the v1 five-boundary result
+(92.4\% $\to$ 96.8\%) is attributable to the expanded training set
+(200 $\to$ 240 positives, negatives unchanged at 120); the hand-crafted
+evaluation corpus was held constant across runs.  Per-item latency
+is $\sim$1.1\,ms in batch mode and $\sim$6.15\,ms mean for single
+inference on the six-boundary Dolly-500 corpus (54~req/s, consistent
+is $\sim$1.1\,ms in batch mode and $\sim$6.15\,ms mean for single
+inference on the six-boundary Dolly-500 corpus (163~req/s, consistent
+with Table~\ref{tab:throughput}); batch mode is appropriate for offline
+evaluation but single-inference latency is the production-relevant
+number. SetFit at $\sim$6.15\,ms is roughly 52$\times$ slower than
+PreFlight end-to-end ($\sim$118\,\textmu s) and $\sim$1{,}310$\times$
+slower than PreFlight's pure policy-evaluation path ($\sim$4.7\,\textmu s),
+but $\sim$71$\times$ faster than NeMo's LLM call ($\sim$437\,ms).
 
 On the 40-task safe set held out from the safe task pool
 (the remaining 75\% served as training negatives), FPR is 0.0\%.
 However, on 500~diverse benign tasks from Dolly~15k (the same corpus
-used for the keyword-engine ablation), SetFit refused 230/500 (46\%,
+used for the keyword-engine ablation), SetFit refused 235/500 (47\%,
 seed~42). Refused tasks include benign queries such as ``What are some
 fun ways to spend time with your family?'' and ``Name some TV shows
 that American actress Gillian Anderson has been in.'' The pattern is
 over-classification of open-domain benign text as policy-violating,
 likely because the 120-example negative set is too narrow to teach the
-decision boundary for arbitrary safe traffic.  This is a negative
-result about the three-tier cost model: the middle tier, as
-configured here, is not a drop-in production component.  Closing the
-FPR gap is a training-distribution problem (negative-set breadth,
-threshold tuning, or a larger backbone), not a structural one.
+decision boundary for arbitrary safe traffic, and the
+47\% six-boundary figure is a slight increase over the 46\% measured
+on the five-boundary training set --- consistent with the expected
+direction for a wider policy surface but not a material departure.
+This is a negative result about the three-tier cost model: the middle
+tier, as configured here, is not a drop-in production component.
+Closing the FPR gap is a training-distribution problem (negative-set
+breadth, threshold tuning, or a larger backbone), not a structural
+one.
 
-Per-boundary recall is 100\% for all five boundaries on the held-out
-corpus. A leave-one-boundary-out holdout (training on 4~boundaries,
-evaluating on the held-out boundary's rephrasings) yielded
-96.8--100\% recall across the five folds, indicating that the
-sentence-transformer generalises across boundary types rather than
-memorising boundary-specific vocabulary.
+Per-boundary recall is 100\% for all six boundaries on the held-out
+rephrasings corpus (i.e.\ a held-out \emph{test split} of rephrasings,
+not a held-out \emph{boundary}; see Future Work for the distinction).
+A leave-one-boundary-out holdout (training on 5~boundaries,
+evaluating on the held-out boundary's rephrasings) was not re-run for
+the six-boundary corpus; the five-boundary run yielded 96.8--100\%
+recall across the five folds, indicating that the sentence-transformer
+generalises across boundary types rather than memorising
+boundary-specific vocabulary. Extending the leave-one-out study to
+BOUNDARY-006 is straightforward but was not repeated here.
 
 These results place SetFit as a \emph{potential} middle-tier option
 whose recall matches NeMo on LLM-generated attacks and operates at
@@ -1077,18 +1166,18 @@ millisecond latency, but whose false-positive rate on diverse traffic
 must be reduced before production use. The training and evaluation
 scripts are at \texttt{benchmarks/v2/setfit/}.
 
-\paragraph{Two-phase matching ablation.}
+\paragraph{Two-phase matching ablation (six boundaries).}
 The policy engine uses a two-phase evaluation: Phase~1 checks whether
 the task contains any trigger keywords, and Phase~2 verifies that a
 protected subject also appears. A boundary fires only when
 \emph{both} phases match (trigger $\cap$ subject). To test whether
 this intersection design is justified, we evaluated four matching
-modes on the 1{,}123 automated rephrasings and a 500-task safe corpus
-drawn from Dolly~15k (Table~\ref{tab:ablation}).
+modes on the 1{,}423 six-boundary automated rephrasings and the same
+500-task safe corpus drawn from Dolly~15k (Table~\ref{tab:ablation}).
 
 \begin{table}[h]
 \centering
-\caption{Two-phase matching ablation: attack recall (1{,}123
+\caption{Two-phase matching ablation (six boundaries): attack recall (1{,}423
   adversarial rephrasings) and false-positive rate on 500~Dolly safe
   tasks.}
 \label{tab:ablation}
@@ -1097,23 +1186,25 @@ drawn from Dolly~15k (Table~\ref{tab:ablation}).
 \toprule
 \textbf{Mode} & \textbf{Attack recall} & \textbf{Safe FPR} \\
 \midrule
-Trigger only              & 10.4\% (117/1{,}123) & 3.8\% (19/500) \\
-Subject only              &  4.5\% (51/1{,}123)  & 3.0\% (15/500) \\
-Trigger $\cap$ Subject    &  4.3\% (48/1{,}123)  & 2.6\% (13/500) \\
-Trigger $\cup$ Subject    & 10.7\% (120/1{,}123) & 4.2\% (21/500) \\
+Trigger only              & 16.4\% (233/1{,}423) & 4.8\% (24/500) \\
+Subject only              &  8.9\% (127/1{,}423) & 3.8\% (19/500) \\
+Trigger $\cap$ Subject    &  8.7\% (124/1{,}423) & 3.4\% (17/500) \\
+Trigger $\cup$ Subject    & 16.6\% (236/1{,}423) & 5.0\% (25/500) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 The current design (trigger $\cap$ subject) yields the lowest
-false-positive rate (2.6\%) while attack recall remains within 0.2
-percentage points of subject-only (4.3\% vs.\ 4.5\%). The union mode
-doubles recall to 10.7\% but increases false positives by 62\%
-relative. All 13~false positives under the intersection mode
-come from BOUNDARY-005 (location privacy), where common words
-``home'' and ``location'' appear in both trigger and subject lists,
-firing on benign tasks such as ``home maintenance'' or ``AirBnB
-location reviews.'' Since all four modes have low absolute recall on
+false-positive rate (3.4\%) while attack recall remains within 0.2
+percentage points of subject-only (8.7\% vs.\ 8.9\%). The union mode
+roughly doubles recall to 16.6\% but increases false positives by 47\%
+relative (25 vs.\ 17 FPs). Of the 17~false positives under the
+intersection mode, 13 come from BOUNDARY-005 (location privacy)
+where ``home'' and ``location'' appear in both trigger and subject
+lists, and the remaining 4 come from BOUNDARY-006 (LLM06) where
+``source'', ``weights'', ``internal'', and ``personal'' fire on benign
+queries (open-source software, weight loss, internal organs, personal
+projects). Since all four modes have low absolute recall on
 adversarial rephrasings, the intersection design is the correct
 choice: it minimises false positives on safe traffic without
 sacrificing meaningful recall, reserving semantic detection for the
@@ -1123,12 +1214,16 @@ LLM layer.
 To measure false-positive rate on realistic benign traffic, we drew 500
 instruction-type tasks from Dolly~15k~\cite{DatabricksBlog2023DollyV2}
 (filtered to 50--300~characters, deterministic ordering via SHA-256
-digest). PreFlight's deterministic engine refused 13/500 (2.6\%), all from a
-single boundary (BOUNDARY-005, location privacy) due to the common
-words ``home'' and ``location.'' This confirms that the keyword-matching
-approach is conservative on safe traffic; the FPR would drop to 0.0\%
-if BOUNDARY-005's keyword lists were tightened (e.g., replacing ``home''
-with ``home address''). The corpus is included at
+digest). PreFlight's deterministic engine refused 17/500 (3.4\%) on the
+six-boundary configuration, split between BOUNDARY-005 (13 FPs, from
+``home''/``location'') and BOUNDARY-006 (4 FPs, from
+``source''/``weights''/``internal''/``personal''). This confirms that
+the keyword-matching approach is conservative on safe traffic and that
+the incremental FPR from adding an externally sourced boundary is
+bounded (0.8 percentage points for LLM06's 11-word trigger list); the
+FPR would drop further if the overloaded trigger words in BOUNDARY-005
+and BOUNDARY-006 were tightened (e.g., ``home address'' instead of
+``home''). The corpus is included at
 \texttt{benchmarks/v2/safe\_corpus/dolly\_500.csv}.
 
 \paragraph{External-framework boundary (OWASP LLM06).}
@@ -1163,37 +1258,49 @@ generalises to a rule sourced from an external framework, not to
 re-optimise recall.
 
 \paragraph{Status of measurements.}
-At time of writing, the original five-boundary benchmark numbers in
-Tables~\ref{tab:accuracy}, \ref{tab:evasion_unified},
-\ref{tab:auto_evasion}, \ref{tab:setfit}, and~\ref{tab:ablation}
-reflect the original rule set only.  Adding BOUNDARY-006 requires
-re-running:
+The downstream measurements have been re-run on the six-boundary
+configuration and are reflected in
+Tables~\ref{tab:auto_evasion}, \ref{tab:setfit}, and~\ref{tab:ablation}
+above. PreFlight's deterministic engine refused 124/1{,}423 (8.7\%)
+across six boundaries (per-boundary range 0.5--14.9\%, with LLM06 at
+14.9\% the highest --- consistent with its wider trigger list); NeMo
+Guardrails refused 1{,}423/1{,}423 (100\%). SetFit's held-out recall
+remains 100\% (SD = 0\% across 5 seeds) on all 1{,}183~held-out
+rephrasings and on the 1{,}049~trigger-free subset, and recall on the
+50~hand-crafted rephrasings is 96.8\% (SD = 1.8\%). On the
+Dolly-500 safe corpus the deterministic engine's FPR moves from
+2.6\% (five boundaries) to 3.4\% (six boundaries), and SetFit's FPR
+moves from 46\% to 47.0\% --- both increases are bounded and in the
+predicted direction. The classifier baseline
+(Table~\ref{tab:evasion_unified}, TF-IDF column) was \emph{not} re-run
+for six boundaries;
+the five-boundary number (2.6\% recall, N=1{,}123) is already worse
+than PreFlight and well below NeMo, so the result is unlikely to change
+materially.  The six-boundary corpus, evaluator patches, SetFit
+training-set extension, and safe-corpus runner extension are committed
+to \texttt{benchmarks/v2/external\_boundaries/llm06/} and
+\texttt{benchmarks/v2/ablation/ablation\_six\_boundary.py}.
 
-\begin{itemize}[nosep]
-  \item \texttt{benchmarks/generate\_evasion\_corpus.py} with the
-    LLM06 rule inserted into the boundary list, producing a sixth
-    per-boundary rephrasing file (target: $\sim$200 entries,
-    matching the range of existing per-boundary corpora).
-  \item \texttt{benchmarks/eval\_auto\_corpus.py} against PreFlight
-    and NeMo on the extended 1{,}300--1{,}400-entry corpus.
-  \item \texttt{benchmarks/v2/setfit/train\_setfit.py} with 40
-    additional LLM06 positives and 24 additional negatives (keeping
-    the 5:3 positive:negative ratio used for BOUNDARY-001--005).
-  \item The Dolly-500 evaluation, unchanged, to observe any FPR
-    shift introduced by the LLM06 trigger set on open-domain
-    traffic (\texttt{pii}, \texttt{personal}, and \texttt{model}
-    are higher-risk for false positives than the original
-    triggers).
-\end{itemize}
+One preliminary observation from the corpus itself is already
+available without running the evaluator: LLM06's trigger-free yield
+(156/202 = 77.2\%) is lower than the aggregate trigger-free yield
+across BOUNDARY-001--005 (1{,}100 of 1{,}221 = 90.1\%). Per-boundary
+trigger-free counts for BOUNDARY-001--005 are not tabulated in this
+paper (they are available in the per-rephrasing CSV) so we do not
+claim LLM06 is the lowest on a per-boundary basis; the aggregate
+comparison is the defensible statement. The abliterated Qwen3
+generator found LLM06's eleven-word trigger list harder to evade than
+the six- or seven-word lists of the original boundaries.  This is consistent
+with the theoretical expectation that a wider trigger vocabulary
+makes keyword matching more robust at the cost of higher
+false-positive risk on benign traffic --- the tradeoff the
+Dolly-500 re-run confirmed (3.4\% vs.\ 2.6\% deterministic FPR).
 
-The boundary definition, the corpus-generation prompt diff, and the
-SetFit training-set extension are committed to
-\texttt{benchmarks/v2/external\_boundaries/llm06/} so that an
-independent replicator can produce the six-boundary numbers on their
-own hardware.  Reporting these numbers in the main tables is deferred
-to a revision; the purpose of this subsection is to establish the
-mechanism and make the validity gap explicit rather than to close it
-in this submission.
+The boundary definition, the generated corpus, the NeMo and
+evaluator patches, and the SetFit training-set extension are
+committed to \texttt{benchmarks/v2/external\_boundaries/llm06/} so
+that an independent replicator can reproduce the six-boundary numbers
+on their own hardware.
 
 \paragraph{Limitation tracking.}
 The limitation registry is itself a crate (\texttt{ai-os-limitations})
@@ -1246,12 +1353,12 @@ Firewall) applies fast pattern-matching rules to block known attacks,
 while a deeper inspection layer analyses payloads semantically. Neither
 replaces the other.  Empirically, submitting all 50~hand-crafted
 rephrasings from Section~\ref{sec:limitations} to NeMo Guardrails
-yielded 50/50~refusals, and on the larger 1{,}123-rephrasing
-automated corpus NeMo achieved 99.7\%~refusal
+yielded 50/50~refusals, and on the larger 1{,}423-rephrasing
+six-boundary automated corpus NeMo achieved 100\%~refusal
 (Table~\ref{tab:auto_evasion}), while the deterministic engine caught
-only 4.3\%.  A layered pipeline that refuses if either engine fires
-matched NeMo's 99.7\% coverage at $\sim$433\,ms end-to-end, while
-requests caught by PreFlight alone (3.3\% of the timing sample) completed
+only 8.7\%.  A layered pipeline that refuses if either engine fires
+matches NeMo's 100\% coverage at $\sim$433\,ms end-to-end, while
+requests caught by PreFlight alone completed
 in $\sim$10\,ms without invoking the LLM.  NeMo's
 latency does not decrease with
 smaller policy sets either: the LLM inference cost is a fixed floor
@@ -1286,8 +1393,8 @@ NeMo alone (full LLM)          & 61.00 & 225.00 & 301.93 \\
 LLM-binary alone                & 37.25 & 139.50 & 502.88 \\
 SetFit alone (CPU)              & 0     & 0      & 0 \\
 PreFlight alone (CPU)               & 0     & 0      & 0 \\
-PreFlight $\to$ NeMo               & 59.36 & 218.96 & 293.83 \\
-PreFlight $\to$ SetFit $\to$ NeMo$^\|$  & 0.29  & 1.08   & 1.44 \\
+PreFlight $\to$ NeMo               & 58.76 & 216.75 & 290.87 \\
+PreFlight $\to$ SetFit $\to$ NeMo$^\|$  & 0.28  & 1.03   & 1.38 \\
 \bottomrule
 \multicolumn{4}{l}{\footnotesize $^\|$Assumes SetFit FPR $\approx$ 0\%; see Caveat below.} \\
 \end{tabular}
@@ -1297,29 +1404,36 @@ as of April~2026; actual deployment costs will vary with provider pricing
 at time of use.
 \end{table}
 
-The two-tier PreFlight$\to$NeMo pipeline saves only 2.7\% of LLM calls
-(the measured PreFlight fast-path rate at 95/5 traffic), reducing cost by
-\$1.64--\$6.04 per~1M decisions. The saving is modest because PreFlight
-catches only 4.3\% of adversarial inputs and 2.6\% of benign inputs
-(as false positives).
+The two-tier PreFlight$\to$NeMo pipeline saves LLM calls on the
+fraction of traffic PreFlight refuses. With a 95/5 benign/attack
+mix, a 3.4\% deterministic FPR on benign traffic, and 8.7\% recall
+on attacks:
+$0.95 \times 0.034 + 0.05 \times 0.087 = 0.0366$, i.e.\ PreFlight
+settles $\approx$3.7\% of decisions. At the stated token prices this
+saves $\$2.26$ per 1M at nano and $\$8.33$ per 1M at mini, a modest
+saving because PreFlight catches only 8.7\% of adversarial inputs and
+3.4\% of benign inputs (as false positives).
 
 The three-tier PreFlight$\to$SetFit$\to$NeMo pipeline is dramatically
-cheaper: SetFit handles the remaining 97.3\% of traffic at zero token
-cost, escalating only an estimated 10\% of unseen attacks to NeMo
+cheaper in the ideal case: once PreFlight settles its 3.7\% share,
+SetFit handles the remaining 96.3\% of traffic at zero token cost,
+escalating only an estimated 10\% of unseen attacks to NeMo
 (derived from SetFit's 7.6\% miss rate on hand-crafted attacks,
 rounded up for conservatism).
-This reduces the per-1M cost from \$61--\$225 to \$0.29--\$1.08, a
-reduction of two orders of magnitude.
+Under this assumption the per-1M cost falls from \$61--\$225 to the
+\$0.28--\$1.03 range tabulated above (residual attack-escalation
+cost only), a reduction of two orders of magnitude.
 
 \textbf{Caveat.}  These cost figures assume SetFit correctly passes
 benign traffic.  Our Dolly-500 evaluation
-(Table~\ref{tab:setfit}) found a 46\% false-positive rate on diverse
-benign tasks, meaning nearly half of legitimate queries would be
-incorrectly blocked.  Two mitigations exist: (a)~adding a NeMo
+(Table~\ref{tab:setfit}) found a 47\% false-positive rate on diverse
+benign tasks in the six-boundary configuration, meaning nearly half of
+legitimate queries would be incorrectly blocked.  Two mitigations exist: (a)~adding a NeMo
 confirmation step for SetFit-flagged traffic, which raises the per-1M
-cost to roughly \$28--\$104 (46\% of benign $\times$ NeMo rate) but
+cost to roughly \$29--\$106 (47\% of benign $\times$ NeMo rate) but
 preserves recall, or (b)~expanding the negative training set beyond
-120~examples to reduce FPR.  In either case, the cost model as stated
+144~examples to reduce FPR would also preserve recall with lower
+token cost.  In either case, the cost model as stated
 represents a best-case scenario; the actual deployment cost depends on
 achieving acceptable FPR through additional training or threshold
 tuning.
@@ -1339,8 +1453,8 @@ NeMo ($\sim$2.3~req/s).
 \textbf{System} & \textbf{req/s} & \textbf{Mean latency} \\
 \midrule
 PreFlight (release)        & 8{,}475  & 118\,\textmu s \\
-SetFit (batch=32, CPU) & 333      & 3.0\,ms \\
-SetFit (single, CPU)   & 54       & 18.6\,ms \\
+SetFit (batch=32, CPU) & 909      & 1.1\,ms \\
+SetFit (single, CPU)   & 163      & 6.2\,ms \\
 NeMo Guardrails        & 2.3      & 437\,ms \\
 LLM-binary             & 1.4      & 724\,ms \\
 LLM-verbose            & 0.7      & 1{,}500\,ms \\
@@ -1357,28 +1471,36 @@ LLM-verbose            & 0.7      & 1{,}500\,ms \\
   \item \textbf{Evasion corpus authoring.} The original 50~rephrasings were
     authored by the paper's author, who had complete knowledge of
     the trigger-keyword sets.  To mitigate this single-author bias,
-    we generated a larger 1{,}123-rephrasing corpus using an LLM
+    we generated a larger 1{,}423-rephrasing corpus using an LLM
+    spanning six boundaries (five author-chosen plus an
+    OWASP-sourced LLM06 rule)
     (Section~\ref{sec:limitations}).  The automated corpus confirmed
-    the hand-crafted results: PreFlight caught 4.3\% of the
-    1{,}123~automated rephrasings, consistent with the 4\% rate on the
+    the hand-crafted results: PreFlight caught 8.7\% of the
+    1{,}423~automated rephrasings, consistent with the 4\% rate on the
     hand-crafted strict corpus; the 40\% rate on the hand-crafted
     pilot corpus reflects that pilot's inadvertent trigger-word
-    retention.  NeMo caught 99.7\% (vs.\ 100\% hand-crafted).  However, both
-    corpora share the same five boundary definitions, and the LLM
-    generator was prompted with knowledge of the trigger keywords,
-    so generalisation beyond these specific boundaries remains limited.
+    retention.  NeMo caught 100\% (vs.\ 100\% hand-crafted).  However,
+    the automated generator was prompted with knowledge of the
+    trigger keywords, so generalisation beyond these specific
+    boundaries remains limited.
     Cross-author validation with independent human rephrasing, and
     cross-model generator diversity checks, remain future work.
   \item \textbf{Local LLM only.} All benchmarks used a locally hosted
     model via LM~Studio. A cloud-hosted LLM (e.g., GPT-4 via OpenAI API)
     would add network latency, increasing the gap further. Conversely,
     purpose-built guardrail models (smaller, faster) might narrow it.
-  \item \textbf{Five boundaries in head-to-head.} The primary LLM comparison uses
-    five boundary rules. The PreFlight scaling study
-    (Section~\ref{sec:eval:scaling}) confirms flat latency up to
+  \item \textbf{Scope of the head-to-head.}  The latency and accuracy
+    head-to-head (Tables~\ref{tab:latency}, \ref{tab:accuracy},
+    \ref{tab:stats}) was run on the five-boundary latency
+    configuration; the evasion and FPR head-to-head
+    (Tables~\ref{tab:auto_evasion}, \ref{tab:setfit},
+    \ref{tab:ablation}) was run on the six-boundary configuration
+    (five author-chosen plus one OWASP-sourced). The PreFlight scaling
+    study (Section~\ref{sec:eval:scaling}) confirms flat latency up to
     500~boundaries. A supplementary NeMo scaling experiment at
-    50~boundaries shows NeMo's latency is also flat
-    (0.98$\times$ ratio), but we did not re-test NeMo at 500~boundaries.
+    50~boundaries (synthetic rule stubs, not LLM06) shows NeMo's
+    latency is also flat (0.98$\times$ ratio), but we did not re-test
+    NeMo at 500~boundaries.
   \item \textbf{Single model, single hardware configuration.} Results
     will vary with GPU, CPU, model architecture, quantisation, and
     hosting configuration.
@@ -1437,8 +1559,8 @@ an attacker faces two independent barriers. An adversary who knows the
 trigger keywords can rephrase to bypass Layer~1 (deterministic) but
 must still evade Layer~2 (LLM-based intent classification). Our
 evasion studies confirm this: NeMo refused all~50 hand-crafted
-rephrasings and 1{,}120 of 1{,}123 automated rephrasings (99.7\%),
-catching all but 3 of the rephrasings that bypassed the keyword engine. Conversely, an
+rephrasings and 1{,}423 of 1{,}423 automated rephrasings (100\%),
+catching every rephrasing that bypassed the keyword engine. Conversely, an
 attacker who crafts adversarial examples targeting the LLM (e.g.,
 gradient-based input perturbations, prompt injection, or
 context-window flooding) might bypass Layer~2 but is unlikely to
@@ -1471,18 +1593,24 @@ raises the cost of evasion relative to any single-layer system.
     transport layer is future work.
   \item \textbf{Fine-tuned classifier improvement.} The SetFit classifier
     (Section~\ref{sec:limitations}) achieved 100\% recall on automated
-    rephrasings and 92.4\% on hand-crafted ones, but its 46\%
+    rephrasings and 96.8\% on hand-crafted ones, but its 47\%
     false-positive rate on diverse benign traffic (Dolly~500) is the
     open training-distribution problem blocking the three-tier cost
-    model. Expanding the negative training set beyond 120~examples,
+    model. Expanding the negative training set beyond the current
+    120~hand-written examples,
     using a larger sentence-transformer backbone (e.g.,
     \texttt{paraphrase-mpnet-base-v2}), or tuning the
     classification threshold are the obvious next steps.
   \item \textbf{Cross-boundary generalisation.} The leave-one-boundary-out
     holdout in Section~\ref{sec:limitations} demonstrates generalisation
-    across the five existing boundaries at 96.8 to 100 percent recall.
+    across the five original boundaries at 96.8--100\% recall. The
+    analogous experiment on BOUNDARY-006 (training on
+    BOUNDARY-001--005 and evaluating on held-out LLM06 rephrasings)
+    has not been run and is explicit future work; the six-boundary
+    held-out \emph{test split} reached 100\% recall, but this is a
+    held-out-rephrasings result, not a held-out-boundary result.
     Testing on external-author boundaries and broader policy domains
-    remains future work.
+    also remains future work.
   \item \textbf{Policy engine extraction.} Publish the policy engine as a
     standalone Rust crate usable as a sidecar service or library by
     existing agent frameworks.
@@ -1495,10 +1623,11 @@ raises the cost of evasion relative to any single-layer system.
 
 We measured the tradeoff between deterministic keyword-based policy
 enforcement and LLM-based guardrails for pre-dispatch AI agent governance.
-On the same five boundary rules and the same LLM backend, the deterministic
-engine evaluates policy decisions in $\sim$118\,\textmu s versus NeMo
-Guardrails' $\sim$437\,ms, a gap of three orders of magnitude, while
-maintaining equivalent accuracy on keyword-matching tasks.
+On the five-boundary latency configuration and the same LLM backend, the
+deterministic engine evaluates policy decisions in $\sim$118\,\textmu s
+versus NeMo Guardrails' $\sim$437\,ms, a gap of three orders of
+magnitude, while maintaining equivalent accuracy on keyword-matching
+tasks.
 A scaling study confirms that enforcement latency remains flat
 ($\sim$4.7\,\textmu s) from 5 to 500~boundaries, validating the $O(k)$
 claim. NFKC Unicode normalisation blocks a class of character-level
@@ -1507,21 +1636,25 @@ evasion attempts.
 The cost is semantic coverage: keyword-based enforcement cannot detect
 rephrased attacks (96\% bypass rate on a strict trigger-avoidant corpus),
 documented formally as LIM-004. An automated corpus of
-1{,}123~LLM-generated rephrasings confirmed this: PreFlight caught only
-4.3\%, while NeMo Guardrails caught 99.7\%. A SetFit
+1{,}423~LLM-generated rephrasings across six boundaries (five author-
+chosen plus the OWASP-sourced LLM06 boundary) confirmed this:
+PreFlight caught only
+8.7\%, while NeMo Guardrails caught 100\%. A SetFit
 sentence-transformer (22M~parameters) matched NeMo's recall on automated
-rephrasings (100\%) and reached 92.4\% on hand-crafted evasion at
+rephrasings (100\%) and reached 96.8\% on hand-crafted evasion at
 millisecond latency, but on 500~benign Dolly~15k tasks its
-false-positive rate was 46\%, making it not deployable without
+false-positive rate was 47\%, making it not deployable without
 mitigation.
 
 A three-tier pipeline (PreFlight$\to$SetFit$\to$NeMo) could reduce the
 per-1M-decision cost by two orders of magnitude relative to NeMo alone
 (Section~\ref{sec:cost}), but only if SetFit's false-positive rate is
-brought near zero. The contribution is the published evasion benchmark,
-the tradeoff quantification, including the negative SetFit FPR
-result, and the reusable experimental methodology, not the prototype
-itself.
+brought near zero. Our three contributions, restated: (i)~the
+three-order-of-magnitude latency gap measured on the five-boundary
+configuration; (ii)~the six-boundary head-to-head evasion benchmark
+against NeMo and its 1{,}423-rephrasing automated corpus; (iii)~the
+negative SetFit FPR result on Dolly-500. The deterministic prototype is
+the measurement harness, not a deployable system.
 
 The limitation tracking discipline, the compile-time semantic
 flagging layer, and the head-to-head benchmark data may be useful
@@ -1530,9 +1663,11 @@ to practitioners building governance infrastructure for AI agent systems.
 All source code, test suites, benchmark scripts, NeMo configuration
 files, and the exact attack/safe task definitions are available at
 \url{https://github.com/josejalvarezm/ai-os-research}.
-The five attack tasks and five safe tasks used in
-all benchmarks can be found in \texttt{benchmark\_real\_llm.rs} and
-\texttt{benchmark\_nemo.py}.
+The five attack tasks and five safe tasks used in the latency and
+accuracy head-to-heads can be found in \texttt{benchmark\_real\_llm.rs}
+and \texttt{benchmark\_nemo.py}; the six-boundary evasion corpus,
+NeMo prompt extension, SetFit training diff, and Dolly-500 FPR runner
+are in \texttt{benchmarks/v2/external\_boundaries/llm06/}.
 
 \bibliographystyle{plainnat}
 
@@ -1648,13 +1783,44 @@ python benchmarks/nemo/benchmark_nemo.py
 # Run scaling study (no LM Studio needed)
 cargo test --release -p ai-os-kernel \
   --test benchmark_scaling -- --nocapture
+
+# --- Six-boundary experiments (contributions ii and iii) ---
+
+# Generate six-boundary automated evasion corpus (requires LM Studio
+# with an abliterated Qwen3-30B-A3B variant; see Section 6)
+python benchmarks/generate_evasion_corpus.py --include-llm06
+
+# Evaluate PreFlight and NeMo on the 1,423-rephrasing corpus
+python benchmarks/eval_auto_corpus.py \
+  --csv benchmarks/v2/external_boundaries/llm06/auto_rephrasings_llm06.csv
+
+# Train SetFit (5 seeds, six-boundary: 240 positives + 120 negatives).
+# Reads the combined corpus; no flag needed.
+python benchmarks/v2/setfit/train_setfit.py
+
+# Measure Dolly-500 FPR for PreFlight (six boundaries)
+python benchmarks/v2/safe_corpus/safe_fpr.py
+
+# Measure Dolly-500 FPR for SetFit (seed 42)
+python benchmarks/v2/setfit/eval_dolly500.py
+
+# Two-phase matching ablation on the six-boundary corpus
+python benchmarks/v2/ablation/ablation_six_boundary.py
+
+# Regenerate cost and throughput tables
+python benchmarks/v2/cost_model.py
 \end{lstlisting}
 
 \subsection{LLM-verbose (Structured) Guardrail Prompt}
 \label{app:prompt}
 
 The exact system prompt used for the LLM-verbose baseline
-(Section~\ref{sec:eval:latency}):
+(Section~\ref{sec:eval:latency}). This is the \emph{five-boundary
+latency-benchmark configuration}. The six-boundary evasion run
+(Section~\ref{sec:limitations}) used the same prompt template with
+a sixth block appended listing the OWASP LLM06 rule and its eleven-
+word trigger list; the block is emitted by the identical code path
+and is not reproduced here.
 
 \begin{lstlisting}[language={},caption={LLM-verbose enforcement prompt (JSON output).},basicstyle=\ttfamily\scriptsize]
 You are a strict policy enforcement engine. Your ONLY

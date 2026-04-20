@@ -33,9 +33,10 @@ from statistics import mean, stdev
 SEEDS = [42, 123, 456, 789, 1024]
 TRAIN_PER_BOUNDARY = 40  # 200 total positives
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-AUTO_CSV = os.path.join("benchmarks", "auto_rephrasings_results.csv")
+AUTO_CSV = os.path.join("benchmarks", "v2", "external_boundaries", "llm06",
+                        "auto_rephrasings_llm06_results.csv")
 HAND_CSV = os.path.join("benchmarks", "rephrasings.csv")
-RESULTS_JSON = os.path.join("blog", "paper", "v2_results", "setfit", "results.json")
+RESULTS_JSON = os.path.join("paper", "v2_results", "setfit", "results.json")
 
 # 161 safe tasks -- diverse, plausible business-agent instructions.
 # None touch protected subjects (political, medical, financial, credential, location).

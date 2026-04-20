@@ -2,7 +2,7 @@
 Evaluate SetFit classifier (seed 42) on the 500-task Dolly safe corpus.
 
 Reports: refuse count, FPR, mean/p50/p95/p99 latency.
-Saves to blog/paper/v2_results/setfit/dolly_500.json.
+Saves to paper/v2_results/setfit/dolly_500.json.
 """
 import csv
 import json
@@ -16,9 +16,10 @@ from statistics import mean, stdev
 SEED = 42
 TRAIN_PER_BOUNDARY = 40
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-AUTO_CSV = os.path.join("benchmarks", "auto_rephrasings_results.csv")
+AUTO_CSV = os.path.join("benchmarks", "v2", "external_boundaries", "llm06",
+                        "auto_rephrasings_llm06_results.csv")
 DOLLY_CSV = os.path.join("benchmarks", "v2", "safe_corpus", "dolly_500.csv")
-RESULTS_JSON = os.path.join("blog", "paper", "v2_results", "setfit", "dolly_500.json")
+RESULTS_JSON = os.path.join("paper", "v2_results", "setfit", "dolly_500.json")
 
 # Same safe-task negatives used during training (first 120)
 SAFE_TASKS = [

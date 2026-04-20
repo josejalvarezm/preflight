@@ -5,7 +5,7 @@
     "tokens_output_nemo": 20,
     "tokens_output_binary": 1,
     "gpu_cost_per_hr": 2.5,
-    "aios_fast_path_rate": 0.0268,
+    "aios_fast_path_rate": 0.0367,
     "setfit_escalation_rate": 0.1,
     "pricing_source": "OpenAI API (April 2026)",
     "self_hosted_gpu": "A100 80GB cloud on-demand"
@@ -32,14 +32,14 @@
       "self_hosted": 0.0
     },
     "AI-OS -> NeMo": {
-      "nano": 59.36,
-      "mini": 218.96,
-      "self_hosted": 293.83
+      "nano": 58.76,
+      "mini": 216.75,
+      "self_hosted": 290.87
     },
     "AI-OS -> SetFit -> NeMo": {
-      "nano": 0.29,
-      "mini": 1.08,
-      "self_hosted": 1.44
+      "nano": 0.28,
+      "mini": 1.03,
+      "self_hosted": 1.38
     }
   },
   "throughput": {
@@ -48,12 +48,12 @@
       "latency_ms": 0.1
     },
     "SetFit (single, CPU)": {
-      "req_per_s": 53.8,
-      "latency_ms": 18.6
+      "req_per_s": 162.6,
+      "latency_ms": 6.2
     },
     "SetFit (batch=32, CPU)": {
-      "req_per_s": 336.2,
-      "latency_ms": 3.0
+      "req_per_s": 909.1,
+      "latency_ms": 1.1
     },
     "LLM-binary": {
       "req_per_s": 1.4,

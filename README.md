@@ -49,6 +49,50 @@ Evaluate against PreFlight and NeMo:
 Input file: `benchmarks/auto_rephrasings.csv`
 Output file: `benchmarks/auto_rephrasings_results.csv`
 
+### Six-Boundary Extension (OWASP LLM06)
+
+The paper extends the original five boundaries with a sixth
+drawn from OWASP LLM06 (Sensitive Information Disclosure). The
+boundary definition, its generation diffs, and a README are in
+`benchmarks/v2/external_boundaries/llm06/`. Reproducing the
+six-boundary numbers (paper Tables 6, 9, 10, 13, 14 and the
+external-boundary section of Section 6):
+
+Generate the six-boundary corpus (adds ~300 LLM06 rephrasings on top
+of the existing 1,123):
+
+    python benchmarks/generate_evasion_corpus.py --include-llm06
+
+Evaluate PreFlight and NeMo on the 1,423-rephrasing corpus:
+
+    python benchmarks/eval_auto_corpus.py \
+        --csv benchmarks/v2/external_boundaries/llm06/auto_rephrasings_llm06.csv
+
+Train SetFit on the six-boundary corpus (5 seeds, no flag needed —
+the script reads the combined CSV directly):
+
+    python benchmarks/v2/setfit/train_setfit.py
+
+Measure PreFlight's Dolly-500 FPR (six boundaries):
+
+    python benchmarks/v2/safe_corpus/safe_fpr.py
+
+Measure SetFit's Dolly-500 FPR (seed 42 only, reproduces the 47% figure):
+
+    python benchmarks/v2/setfit/eval_dolly500.py
+
+Two-phase matching ablation on the six-boundary corpus:
+
+    python benchmarks/v2/ablation/ablation_six_boundary.py
+
+Regenerate the cost and throughput tables (Tables 13, 14) from the
+six-boundary measurements:
+
+    python benchmarks/v2/cost_model.py
+
+Pre-computed outputs for all of the above are under
+`paper/v2_results/`.
+
 ### Table 8: Hand-Crafted Evasion Study
 
 PreFlight evaluation:

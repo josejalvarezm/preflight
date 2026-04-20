@@ -27,12 +27,13 @@ LLM_BIN_REFUSE  = 1063.0
 LLM_BIN_ALLOW   = 385.3
 LLM_VERB_REFUSE = 2582.7
 LLM_VERB_ALLOW  = 418.0
-SETFIT_SINGLE   = 18.6        # 18.6 ms single-item CPU
-SETFIT_BATCH    = 2.974       # ~3 ms per item in batch=32
+SETFIT_SINGLE   = 6.15        # six-boundary: single-item CPU mean
+SETFIT_BATCH    = 1.10        # six-boundary: per-item in batch=32
 
-# Measured fast-path rates
-AIOS_ATTACK_REFUSE = 0.043    # 4.3% of adversarial rephrasings caught
-AIOS_SAFE_FPR      = 0.026    # 2.6% of safe (Dolly 500) falsely refused
+# Measured fast-path rates (six-boundary configuration,
+# BOUNDARY-001..005 + OWASP LLM06)
+AIOS_ATTACK_REFUSE = 0.087    # 124/1423 adversarial rephrasings caught
+AIOS_SAFE_FPR      = 0.034    # 17/500 safe (Dolly 500) falsely refused
 
 # ---------------------------------------------------------------------------
 # Published API pricing (OpenAI, April 2026)
@@ -194,7 +195,7 @@ def main():
         "layered_throughput_req_s": round(layered_tps, 1),
     }
 
-    out_dir = os.path.join("blog", "paper", "v2_results", "cost_model")
+    out_dir = os.path.join("paper", "v2_results", "cost_model")
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, "results.json")
     with open(out_path, "w") as f:

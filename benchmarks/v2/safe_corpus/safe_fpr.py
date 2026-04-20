@@ -16,7 +16,7 @@ import re
 import unicodedata
 from collections import defaultdict
 
-RESULTS_DIR = os.path.join("blog", "paper", "v2_results", "safe_corpus")
+RESULTS_DIR = os.path.join("paper", "v2_results", "safe_corpus")
 RESULTS_JSON = os.path.join(RESULTS_DIR, "results.json")
 CORPUS_CSV = os.path.join("benchmarks", "v2", "safe_corpus", "dolly_500.csv")
 
@@ -46,6 +46,14 @@ BOUNDARIES = {
         "triggers": ["location", "address", "home", "gps", "coordinates",
                       "whereabouts"],
         "subjects": ["location", "address", "home"],
+    },
+    "BOUNDARY-006": {
+        "triggers": ["proprietary", "confidential", "internal", "source",
+                      "algorithm", "model", "weights", "training", "dataset",
+                      "pii", "personal"],
+        "subjects": ["proprietary", "confidential", "internal", "source",
+                      "algorithm", "weights", "training", "dataset", "pii",
+                      "personal", "identifiable"],
     },
 }
 

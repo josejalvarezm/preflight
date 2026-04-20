@@ -21,7 +21,7 @@ import unicodedata
 from collections import defaultdict
 
 AUTO_CSV = os.path.join("benchmarks", "auto_rephrasings_results.csv")
-RESULTS_JSON = os.path.join("blog", "paper", "v2_results", "ablation", "results.json")
+RESULTS_JSON = os.path.join("paper", "v2_results", "ablation", "results.json")
 
 # The 5 boundaries -- exact mirrors of evasion_study.py / benchmark_enforcement.rs
 BOUNDARIES = {
