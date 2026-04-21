@@ -376,8 +376,12 @@ locally. They skip gracefully when LM Studio is absent.
 **Setup:**
 
 1. Install and open LM Studio.
-2. Load a chat completion model
-   (e.g. `Qwen2.5-Coder-7B-Instruct-GGUF` / `iq3_xs`).
+2. Load the chat completion model used in the paper:
+   `huihui-qwen3-30b-a3b-instruct-2507-abliterated-i1` at `iq3_xs`
+   quantisation (this is the runtime default in
+   `crates/runtime/src/client.rs`; any OpenAI-compatible chat model
+   at `localhost:1234` will work, but reproducing the paper's
+   latency and evasion numbers requires this model).
 3. Start the local server on the default port (`localhost:1234`).
 
 **Run:**
@@ -744,7 +748,9 @@ deterministic suite above.
 **Setup:**
 
 1. Install and open LM Studio
-2. Load a chat completion model (e.g., `Qwen2.5-Coder-7B-Instruct-GGUF` / `iq3_xs`)
+2. Load `huihui-qwen3-30b-a3b-instruct-2507-abliterated-i1` at `iq3_xs`
+   quantisation (the paper's backend; also the runtime default in
+   `crates/runtime/src/client.rs`)
 3. Start the local server on the default port (`localhost:1234`)
 
 **Run:**
