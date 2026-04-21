@@ -387,7 +387,7 @@ locally. They skip gracefully when LM Studio is absent.
 **Run:**
 
 ```bash
-# 5 runtime integration tests (chat completion)
+# 4 runtime integration tests (chat completion)
 cargo test --test integration_llm_runtime -- --ignored --nocapture
 
 # 1 real-LLM benchmark (deterministic vs LLM enforcement)
