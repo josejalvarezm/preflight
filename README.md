@@ -174,15 +174,25 @@ directly and need no LLM.
 
 ## Verifying NeMo fairness
 
-The NeMo Guardrails configurations used for every NeMo row are
-under `benchmarks/nemo/`:
+The NeMo Guardrails configurations used for the benchmark runs
+live in three locations:
 
-- `benchmarks/nemo/config/` -- five-boundary configuration
-  (Tables 3, 4, 5, 6, 8)
+- `benchmarks/nemo/config/` -- five-boundary NeMo Guardrails
+  configuration (`config.yml` + `rails.co`), used for Tables 3, 4,
+  5, the five-boundary point of Table 6, and the hand-crafted rows
+  of Tables 8 and 9.
 - `benchmarks/nemo/config_50/` -- 50-boundary configuration used
-  only for the scaling study (Table 6)
+  only for the 50-boundary point of the scaling study (Table 6).
+- `benchmarks/v2/external_boundaries/llm06/` -- six-boundary NeMo
+  prompt extension (`generate_prompt_diff.md`, `boundary-006.yaml`)
+  used for the automated-corpus row of Table 8 and the entire NeMo
+  column of Table 10. The extension is applied by
+  `benchmarks/eval_auto_corpus.py` when invoked with
+  `--csv benchmarks/v2/external_boundaries/llm06/auto_rephrasings_llm06.csv`
+  (see the six-boundary extension section above).
 
-Each directory contains the Colang flows, `config.yml`, and the
+Each of the two `benchmarks/nemo/` directories contains the
+Colang rails (`rails.co`), `config.yml`, and the
 `self_check_input` prompt template. The rail logic was not
 modified; the only per-boundary change is the `self_check_input`
 prompt, which lists the protected subjects for that configuration.
