@@ -3,17 +3,11 @@
 A Rust framework that imposes deterministic structure on top of
 probabilistic LLM-based agents.
 
-> **Repository note.** The GitHub repo is named `ai-os-research` for
-> provenance with an earlier working name. The project itself is
-> called **PreFlight**; the paper, code, and this README all use
-> that name. The same footnote appears in `paper/paper.tex`.
-
 > **Paper tracked.** This README tracks `paper/paper.pdf` as of
 > 21 April 2026 (v4 draft): PreFlight branding, 84 tests
 > (76 always-running, 8 LLM-gated), 1,423-rephrasing six-boundary
 > corpus, Tables numbered 1--14 as in the current PDF. If you
 > update the paper, update this line.
-
 ## Paper
 
 The paper is titled *"Deterministic Pre-Flight Enforcement for AI
@@ -413,7 +407,7 @@ If the embedding model name differs, these tests print
 ## Project Structure
 
 ```
-ai-os-research/                # repo name; project is PreFlight
+preflight/
 ├── .instructions/             # Persistent instruction files
 │   ├── global.md              # System-wide rules
 │   ├── agents/                # Per-agent instruction files

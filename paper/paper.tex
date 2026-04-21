@@ -282,16 +282,9 @@ PreFlight (this work)               & \checkmark & \checkmark & \checkmark & \ch
 \section{Architecture}
 \label{sec:arch}
 
-We refer to the prototype as
-\emph{PreFlight}\footnote{The prototype is archived in the
-repository under the working name \texttt{ai-os-research}; that
-archive name is retained for provenance (it is the label attached
-to the reproducible artefact corresponding to the date on this
-paper). We use the name \emph{PreFlight} throughout the paper for
-readability, to reflect its scope as a pre-dispatch enforcement
-layer rather than an operating system.}
-throughout this paper; the name reflects its role as a pre-dispatch
-check (``pre-flight'') rather than a claim to operating-system scope.
+We refer to the prototype as \emph{PreFlight} throughout this
+paper; the name reflects its role as a pre-dispatch check
+(``pre-flight'') rather than a claim to operating-system scope.
 
 The system consists of four principal components operating in a strict
 pipeline: instructions are compiled into contracts, contracts are loaded
@@ -1662,7 +1655,7 @@ to practitioners building governance infrastructure for AI agent systems.
 
 All source code, test suites, benchmark scripts, NeMo configuration
 files, and the exact attack/safe task definitions are available at
-\url{https://github.com/josejalvarezm/ai-os-research}.
+\url{https://github.com/josejalvarezm/preflight}.
 The five attack tasks and five safe tasks used in the latency and
 accuracy head-to-heads can be found in \texttt{benchmark\_real\_llm.rs}
 and \texttt{benchmark\_nemo.py}; the six-boundary evasion corpus,
@@ -1756,7 +1749,7 @@ J.~\'Alvarez.
 \label{app:reproduce}
 
 All results can be reproduced from the repository at
-\url{https://github.com/josejalvarezm/ai-os-research},
+\url{https://github.com/josejalvarezm/preflight},
 with the following commands, assuming
 LM~Studio is running at \texttt{localhost:1234} with the models described
 in Section~\ref{sec:eval}.
