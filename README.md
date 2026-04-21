@@ -198,8 +198,11 @@ fastest way to compare is:
 1. Drop the new config into `benchmarks/nemo/config_custom/`.
 2. Point `benchmarks/nemo/benchmark_nemo.py` at it (the config
    path is at the top of the file).
-3. Re-run. Our target numbers are 437 ms mean latency, 100%
-   recall on 1,423 attacks, 47% FPR on Dolly-500.
+3. Re-run. Our target NeMo numbers (paper Tables 3 and 10) are
+   437 ms mean refuse-path latency and 1,423/1,423 (100%) recall
+   on the six-boundary automated evasion corpus. The paper does
+   not report a NeMo Dolly-500 FPR; the 47% figure belongs to
+   SetFit (paper Table 11).
 
 ## Dependencies
 
